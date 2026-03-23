@@ -29,6 +29,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token');
     }
 
+    const activeBan = await this.prisma.ban.findFirst({
+      where: {
+        userId: user.id,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+    if (activeBan) {
+      throw new UnauthorizedException('User banned');
+    }
+
     return {
       id: user.id,
       email: user.email,

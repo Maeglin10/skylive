@@ -20,6 +20,7 @@ import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './jobs/jobs.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
+import { ModerationModule } from './moderation/moderation.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ReportsModule } from './reports/reports.module';
     JobsModule,
     MetricsModule,
     ReportsModule,
+    ModerationModule,
   ],
   providers: [
     {

@@ -56,6 +56,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    const activeBan = await this.prisma.ban.findFirst({
+      where: {
+        userId: user.id,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+    if (activeBan) {
+      throw new UnauthorizedException('User banned');
+    }
+
     const ok = await bcrypt.compare(dto.password, user.passwordHash);
     if (!ok) {
       throw new UnauthorizedException('Invalid credentials');
