@@ -60,6 +60,15 @@ services:
         condition: service_healthy
     volumes:
       - hls_data:/tmp/hls
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"require('http').get('http://localhost:3001/api/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   client:
     build: ./apps/client
     container_name: skylive_client
@@ -71,6 +80,15 @@ services:
       NEXT_PUBLIC_HLS_BASE: http://localhost:8080/hls
     depends_on:
       - api
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"require('http').get('http://localhost:3000',res=>process.exit(res.statusCode>=200&&res.statusCode<500?0:1)).on('error',()=>process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 volumes:
   postgres_data:
   hls_data:
