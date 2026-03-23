@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { InvalidRefreshTokenError } from '../common/errors/known-error';
+import { JobsService } from '../jobs/jobs.service';
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -24,6 +25,7 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly jobsService: JobsService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -44,6 +46,7 @@ export class AuthService {
     });
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
+    await this.jobsService.trackEvent('auth.register', { userId: user.id });
     return { ...tokens, user };
   }
 
@@ -59,6 +62,7 @@ export class AuthService {
     }
 
     const tokens = await this.issueTokens(user.id, user.email, user.role);
+    await this.jobsService.trackEvent('auth.login', { userId: user.id });
     return {
       ...tokens,
       user: {

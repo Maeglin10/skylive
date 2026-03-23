@@ -14,6 +14,7 @@ import { LiveService } from '../live/live.service';
 import { ChatService } from './chat.service';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient, RedisClientType } from 'redis';
+import { JobsService } from '../jobs/jobs.service';
 
 interface ChatJoinPayload {
   liveSessionId: string;
@@ -38,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     private readonly jwtService: JwtService,
     private readonly liveService: LiveService,
     private readonly chatService: ChatService,
+    private readonly jobsService: JobsService,
   ) {}
 
   async afterInit(server: Server) {
@@ -148,6 +150,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       userId,
       payload.content,
     );
+
+    await this.jobsService.trackEvent('chat.message', {
+      liveSessionId: payload.liveSessionId,
+      userId,
+      messageId: message.id,
+    });
 
     this.server.to(payload.liveSessionId).emit('chat:message', message);
   }

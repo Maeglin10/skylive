@@ -4,10 +4,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { JobsService } from '../jobs/jobs.service';
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jobsService: JobsService,
+  ) {}
 
   private async getCreatorId(userId: string) {
     const creator = await this.prisma.creator.findUnique({ where: { userId } });
@@ -17,7 +21,7 @@ export class ContentService {
 
   async create(userId: string, dto: CreateContentDto) {
     const creatorId = await this.getCreatorId(userId);
-    return this.prisma.content.create({
+    const content = await this.prisma.content.create({
       data: {
         creatorId,
         type: dto.type,
@@ -27,6 +31,15 @@ export class ContentService {
         price: dto.price ?? null,
       },
     });
+
+    await this.jobsService.trackEvent('content.created', {
+      contentId: content.id,
+      creatorId,
+      accessRule: content.accessRule,
+      type: content.type,
+    });
+
+    return content;
   }
 
   async getById(userId: string | null, contentId: string) {

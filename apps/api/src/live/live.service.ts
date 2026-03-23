@@ -3,10 +3,14 @@ import { AccessRule } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLiveSessionDto } from './dto/create-live-session.dto';
+import { JobsService } from '../jobs/jobs.service';
 
 @Injectable()
 export class LiveService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jobsService: JobsService,
+  ) {}
 
   private async getCreatorId(userId: string) {
     const creator = await this.prisma.creator.findUnique({ where: { userId } });
@@ -63,7 +67,7 @@ export class LiveService {
     if (!session) throw new NotFoundException('Live session not found');
     if (session.creatorId !== creatorId) throw new ForbiddenException('Not owner');
 
-    return this.prisma.liveSession.update({
+    const updated = await this.prisma.liveSession.update({
       where: { id },
       data: {
         status: 'LIVE',
@@ -71,6 +75,14 @@ export class LiveService {
         hlsUrl: this.buildHlsUrl(session.streamKey),
       },
     });
+
+    await this.jobsService.trackEvent('live.started', {
+      liveSessionId: updated.id,
+      creatorId: updated.creatorId,
+      source: 'api',
+    });
+
+    return updated;
   }
 
   async endSession(userId: string, id: string) {
@@ -79,20 +91,28 @@ export class LiveService {
     if (!session) throw new NotFoundException('Live session not found');
     if (session.creatorId !== creatorId) throw new ForbiddenException('Not owner');
 
-    return this.prisma.liveSession.update({
+    const updated = await this.prisma.liveSession.update({
       where: { id },
       data: {
         status: 'ENDED',
         endedAt: new Date(),
       },
     });
+
+    await this.jobsService.trackEvent('live.ended', {
+      liveSessionId: updated.id,
+      creatorId: updated.creatorId,
+      source: 'api',
+    });
+
+    return updated;
   }
 
   async handleStreamStart(streamKey: string) {
     const session = await this.prisma.liveSession.findUnique({ where: { streamKey } });
     if (!session) throw new NotFoundException('Live session not found');
 
-    return this.prisma.liveSession.update({
+    const updated = await this.prisma.liveSession.update({
       where: { id: session.id },
       data: {
         status: 'LIVE',
@@ -100,19 +120,35 @@ export class LiveService {
         hlsUrl: this.buildHlsUrl(streamKey),
       },
     });
+
+    await this.jobsService.trackEvent('live.started', {
+      liveSessionId: updated.id,
+      creatorId: updated.creatorId,
+      source: 'rtmp',
+    });
+
+    return updated;
   }
 
   async handleStreamEnd(streamKey: string) {
     const session = await this.prisma.liveSession.findUnique({ where: { streamKey } });
     if (!session) throw new NotFoundException('Live session not found');
 
-    return this.prisma.liveSession.update({
+    const updated = await this.prisma.liveSession.update({
       where: { id: session.id },
       data: {
         status: 'ENDED',
         endedAt: new Date(),
       },
     });
+
+    await this.jobsService.trackEvent('live.ended', {
+      liveSessionId: updated.id,
+      creatorId: updated.creatorId,
+      source: 'rtmp',
+    });
+
+    return updated;
   }
 
   async assertLiveAccess(userId: string, liveSessionId: string) {

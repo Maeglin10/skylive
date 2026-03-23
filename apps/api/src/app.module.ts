@@ -18,6 +18,7 @@ import { RequestTimeoutMiddleware } from './common/middleware/request-timeout.mi
 import { ApiThrottlerGuard } from './common/guards/api-throttler.guard';
 import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './jobs/jobs.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { JobsModule } from './jobs/jobs.module';
     PaymentsModule,
     HealthModule,
     JobsModule,
+    MetricsModule,
   ],
   providers: [
     {
