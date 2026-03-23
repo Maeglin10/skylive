@@ -1,0 +1,202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CREATOR
+  SUBSCRIBER
+  VIEWER
+  ADMIN
+}
+
+enum ContentType {
+  IMAGE
+  VIDEO
+  POST
+}
+
+enum AccessRule {
+  FREE
+  SUBSCRIPTION
+  PPV
+}
+
+enum LiveStatus {
+  OFFLINE
+  LIVE
+  ENDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  TRIALING
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  displayName   String?
+  avatarUrl     String?
+  role          UserRole       @default(VIEWER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  refreshTokens RefreshToken[]
+  creator       Creator?
+  subscriptions Subscription[]
+  purchases     Purchase[]
+  tips          Tip[]
+  messages      Message[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Creator {
+  id                 String        @id @default(uuid())
+  userId             String        @unique
+  username           String        @unique
+  bio                String?
+  subscriptionPrice  Int?
+  stripeAccountId    String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contents     Content[]
+  liveSessions LiveSession[]
+  subscribers  Subscription[]
+  tips         Tip[]
+}
+
+model Content {
+  id         String      @id @default(uuid())
+  creatorId  String
+  type       ContentType
+  mediaKey   String?
+  text       String?
+  accessRule AccessRule  @default(FREE)
+  price      Int?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  creator  Creator    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  purchases Purchase[]
+
+  @@index([creatorId])
+}
+
+model LiveSession {
+  id         String     @id @default(uuid())
+  creatorId  String
+  title      String
+  status     LiveStatus @default(OFFLINE)
+  streamKey  String     @unique
+  hlsUrl     String?
+  accessRule AccessRule @default(SUBSCRIPTION)
+  price      Int?
+  startedAt  DateTime?
+  endedAt    DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  creator  Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  chatRoom ChatRoom?
+  purchases Purchase[]
+  tips      Tip[]
+
+  @@index([creatorId])
+}
+
+model ChatRoom {
+  id            String      @id @default(uuid())
+  liveSessionId String      @unique
+  createdAt     DateTime    @default(now())
+
+  liveSession LiveSession @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  messages    Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  chatRoomId String
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chatRoomId])
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String
+  creatorId            String
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorId])
+  @@index([creatorId])
+}
+
+model Purchase {
+  id                    String   @id @default(uuid())
+  userId                String
+  contentId             String?
+  liveSessionId         String?
+  amount                Int
+  stripePaymentIntentId String
+  createdAt             DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     Content?     @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  liveSession LiveSession? @relation(fields: [liveSessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([contentId])
+  @@index([liveSessionId])
+}
+
+model Tip {
+  id            String   @id @default(uuid())
+  userId        String
+  creatorId     String
+  liveSessionId String?
+  amount        Int
+  message       String?
+  createdAt     DateTime @default(now())
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator     Creator      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  liveSession LiveSession? @relation(fields: [liveSessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([creatorId])
+  @@index([liveSessionId])
+}
