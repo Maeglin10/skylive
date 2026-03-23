@@ -19,6 +19,7 @@ import { ApiThrottlerGuard } from './common/guards/api-throttler.guard';
 import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './jobs/jobs.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { MetricsModule } from './metrics/metrics.module';
     HealthModule,
     JobsModule,
     MetricsModule,
+    ReportsModule,
   ],
   providers: [
     {

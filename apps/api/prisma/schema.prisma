@@ -40,6 +40,20 @@ enum SubscriptionStatus {
   TRIALING
 }
 
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  REJECTED
+}
+
+enum ReportTargetType {
+  USER
+  CONTENT
+  LIVE
+  MESSAGE
+}
+
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
@@ -56,6 +70,12 @@ model User {
   purchases     Purchase[]
   tips          Tip[]
   messages      Message[]
+  reportsFiled  Report[]       @relation("ReportsFiled")
+  reportsAgainst Report[]      @relation("ReportsAgainst")
+  blocklist     Blocklist[]    @relation("BlocklistOwner")
+  blockedBy     Blocklist[]    @relation("BlocklistTarget")
+  bans          Ban[]          @relation("BansOnUser")
+  bansIssued    Ban[]          @relation("BansIssued")
 }
 
 model RefreshToken {
@@ -199,4 +219,62 @@ model Tip {
   @@index([userId])
   @@index([creatorId])
   @@index([liveSessionId])
+}
+
+model Report {
+  id                String           @id @default(uuid())
+  reporterId        String
+  targetType        ReportTargetType
+  targetUserId      String?
+  targetContentId   String?
+  targetLiveSessionId String?
+  targetMessageId   String?
+  reason            String
+  details           String?
+  status            ReportStatus     @default(OPEN)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  reporter      User        @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUser    User?       @relation("ReportsAgainst", fields: [targetUserId], references: [id], onDelete: SetNull)
+  targetContent Content?    @relation(fields: [targetContentId], references: [id], onDelete: SetNull)
+  targetLiveSession LiveSession? @relation(fields: [targetLiveSessionId], references: [id], onDelete: SetNull)
+  targetMessage Message?    @relation(fields: [targetMessageId], references: [id], onDelete: SetNull)
+
+  @@index([reporterId])
+  @@index([targetUserId])
+  @@index([targetContentId])
+  @@index([targetLiveSessionId])
+  @@index([targetMessageId])
+  @@index([status])
+}
+
+model Blocklist {
+  id            String   @id @default(uuid())
+  userId        String
+  blockedUserId String
+  reason        String?
+  createdAt     DateTime @default(now())
+
+  user        User @relation("BlocklistOwner", fields: [userId], references: [id], onDelete: Cascade)
+  blockedUser User @relation("BlocklistTarget", fields: [blockedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blockedUserId])
+  @@index([userId])
+  @@index([blockedUserId])
+}
+
+model Ban {
+  id          String   @id @default(uuid())
+  userId      String
+  reason      String?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  createdById String?
+
+  user      User  @relation("BansOnUser", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy User? @relation("BansIssued", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdById])
 }
