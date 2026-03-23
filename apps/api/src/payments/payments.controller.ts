@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Headers, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -42,13 +52,16 @@ export class PaymentsController {
     @Headers('stripe-signature') signature: string,
     @Req() req: Request & { rawBody?: Buffer },
   ) {
+    if (!signature) {
+      throw new BadRequestException('Missing Stripe signature');
+    }
     const rawBody = req.rawBody || Buffer.from('');
     return this.paymentsService.handleWebhook(signature, rawBody);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('portal')
-  portal() {
-    return { url: null };
+  portal(@CurrentUser() user: { id: string }) {
+    return this.paymentsService.createPortalSession(user.id);
   }
 }

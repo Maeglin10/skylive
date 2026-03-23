@@ -7,10 +7,13 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Logger, OnModuleDestroy } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { LiveService } from '../live/live.service';
 import { ChatService } from './chat.service';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { createClient, RedisClientType } from 'redis';
 
 interface ChatJoinPayload {
   liveSessionId: string;
@@ -22,17 +25,43 @@ interface ChatMessagePayload {
 }
 
 @WebSocketGateway({ namespace: '/chat', cors: { origin: '*' } })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy {
   @WebSocketServer()
   server!: Server;
 
   private readonly viewers = new Map<string, Set<string>>();
+  private readonly logger = new Logger(ChatGateway.name);
+  private pubClient?: RedisClientType;
+  private subClient?: RedisClientType;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly liveService: LiveService,
     private readonly chatService: ChatService,
   ) {}
+
+  async afterInit(server: Server) {
+    const redisUrl = this.getRedisUrl();
+    if (!redisUrl) {
+      this.logger.warn('Redis adapter disabled: no REDIS_URL/REDIS_HOST/REDIS_PORT configured');
+      return;
+    }
+
+    try {
+      this.pubClient = createClient({ url: redisUrl });
+      this.subClient = this.pubClient.duplicate();
+
+      await this.pubClient.connect();
+      await this.subClient.connect();
+
+      server.adapter(createAdapter(this.pubClient, this.subClient));
+      this.logger.log('Socket.IO Redis adapter enabled');
+    } catch (error) {
+      this.logger.error(
+        `Failed to init Socket.IO Redis adapter: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
   async handleConnection(client: Socket) {
     const token =
@@ -63,6 +92,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.emitViewerCount(roomId);
       }
     }
+  }
+
+  async onModuleDestroy() {
+    await this.subClient?.quit().catch(() => undefined);
+    await this.pubClient?.quit().catch(() => undefined);
   }
 
   @SubscribeMessage('chat:join')
@@ -121,5 +155,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private emitViewerCount(liveSessionId: string) {
     const count = this.viewers.get(liveSessionId)?.size ?? 0;
     this.server.to(liveSessionId).emit('chat:viewer_count', { liveSessionId, count });
+  }
+
+  private getRedisUrl() {
+    if (process.env.REDIS_URL) return process.env.REDIS_URL;
+
+    const host = process.env.REDIS_HOST;
+    const port = process.env.REDIS_PORT;
+    if (!host && !port) return null;
+
+    const resolvedHost = host || 'localhost';
+    const resolvedPort = port || '6379';
+    return `redis://${resolvedHost}:${resolvedPort}`;
   }
 }

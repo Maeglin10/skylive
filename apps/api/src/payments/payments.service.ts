@@ -98,6 +98,9 @@ export class PaymentsService {
 
   async handleWebhook(signature: string | string[] | undefined, rawBody: Buffer) {
     const secret = process.env.STRIPE_WEBHOOK_SECRET || '';
+    if (!secret) {
+      throw new Error('STRIPE_WEBHOOK_SECRET is not configured');
+    }
     const event = this.stripe.webhooks.constructEvent(rawBody, signature as string, secret);
 
     switch (event.type) {
@@ -117,6 +120,33 @@ export class PaymentsService {
     }
 
     return { received: true };
+  }
+
+  async createPortalSession(userId: string) {
+    const subscription = await this.prisma.subscription.findFirst({
+      where: { userId, stripeSubscriptionId: { not: null } },
+      orderBy: { updatedAt: 'desc' },
+      select: { stripeSubscriptionId: true },
+    });
+
+    if (!subscription?.stripeSubscriptionId) {
+      throw new NotFoundException('No active subscription found');
+    }
+
+    const stripeSub = await this.stripe.subscriptions.retrieve(subscription.stripeSubscriptionId);
+    const customerId =
+      typeof stripeSub.customer === 'string' ? stripeSub.customer : stripeSub.customer?.id;
+
+    if (!customerId) {
+      throw new NotFoundException('Stripe customer not found');
+    }
+
+    const session = await this.stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/billing`,
+    });
+
+    return { url: session.url };
   }
 
   private async handlePaymentIntentSucceeded(intent: Stripe.PaymentIntent) {
