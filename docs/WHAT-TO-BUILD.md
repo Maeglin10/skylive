@@ -4,6 +4,8 @@
 
 **Date de création :** 2026-03-23
 **Plan détaillé :** `docs/plans/2026-03-23-skylive-foundation.md`
+**Roadmap portfolio :** `docs/roadmap/2026-03-23-skylive-portfolio-roadmap.md`
+**Roadmap master :** `docs/roadmap/2026-03-23-skylive-master-roadmap.md`
 **Référence à copier :** `/Users/milliandvalentin/skybot-inbox/`
 
 ---
