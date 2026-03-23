@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { LiveService } from './live.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -39,11 +40,13 @@ export class LiveController {
   }
 
   @Post('webhook/stream-start')
+  @SkipThrottle()
   streamStart(@Body() body: { name: string }) {
     return this.liveService.handleStreamStart(body.name);
   }
 
   @Post('webhook/stream-end')
+  @SkipThrottle()
   streamEnd(@Body() body: { name: string }) {
     return this.liveService.handleStreamEnd(body.name);
   }

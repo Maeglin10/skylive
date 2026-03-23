@@ -38,6 +38,13 @@ export class ReportsService {
     });
   }
 
+  async updateReportStatus(id: string, status: ReportStatus) {
+    return this.prisma.report.update({
+      where: { id },
+      data: { status },
+    });
+  }
+
   private async resolveTarget(type: ReportTargetType, id: string) {
     switch (type) {
       case 'USER': {
