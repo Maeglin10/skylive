@@ -6,6 +6,9 @@
 **Plan détaillé :** `docs/plans/2026-03-23-skylive-foundation.md`
 **Roadmap portfolio :** `docs/roadmap/2026-03-23-skylive-portfolio-roadmap.md`
 **Roadmap master :** `docs/roadmap/2026-03-23-skylive-master-roadmap.md`
+**Tickets :** `docs/roadmap/2026-03-23-skylive-tickets.md`
+**Board d'exécution :** `docs/roadmap/2026-03-23-skylive-board.md`
+**Specs tests :** `docs/roadmap/2026-03-23-skylive-test-specs.md`
 **Référence à copier :** `/Users/milliandvalentin/skybot-inbox/`
 
 ---
