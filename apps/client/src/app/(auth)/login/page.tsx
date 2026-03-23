@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Loader2, Mail, Lock } from "lucide-react";
+import { Sparkles, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -18,8 +19,14 @@ export default function LoginPage() {
     setError("");
     try {
       await login({ email, password });
+      toast.success("Welcome back!", {
+        description: "Successfully signed into your Skylive account."
+      });
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid credentials");
+      setError(err?.response?.data?.message || "Invalid credentials. Please try again.");
+      toast.error("Login failed", {
+        description: err?.response?.data?.message || "Please check your credentials and try again."
+      });
     } finally {
       setIsLoading(false);
     }

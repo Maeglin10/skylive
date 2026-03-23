@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Loader2, Mail, Lock, UserCircle } from "lucide-react";
+import { Sparkles, UserCircle, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -18,9 +21,16 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError("");
     try {
-      await register({ email, password, displayName });
+      await register({ displayName, email, password });
+      toast.success("Account created!", {
+        description: "Welcome to Skylive! You can now start exploring."
+      });
+      router.push("/feed");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(err?.response?.data?.message || "Registration failed. Please try again.");
+      toast.error("Registration failed", {
+        description: err?.response?.data?.message || "Please check your details and try again."
+      });
     } finally {
       setIsLoading(false);
     }

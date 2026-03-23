@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { UserProfile, LoginDto, RegisterDto, UserRole } from '@/lib/api/types';
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { UserProfile, LoginDto, RegisterDto } from '@/lib/api/types';
 import { authAdapter } from '@/lib/api/auth.adapter';
 import { useRouter } from 'next/navigation';
 
@@ -15,13 +15,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('access_token');
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     if (!token) {
       setIsLoading(false);
       return;
@@ -31,8 +31,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const profile = await authAdapter.me();
       setUser(profile);
     } catch (err) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+      }
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -45,16 +47,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: LoginDto) => {
     const res = await authAdapter.login(data);
-    localStorage.setItem('access_token', res.accessToken);
-    localStorage.setItem('refresh_token', res.refreshToken);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', res.accessToken);
+      localStorage.setItem('refresh_token', res.refreshToken);
+    }
     setUser(res.user);
     router.push('/feed');
   };
 
   const register = async (data: RegisterDto) => {
     const res = await authAdapter.register(data);
-    localStorage.setItem('access_token', res.accessToken);
-    localStorage.setItem('refresh_token', res.refreshToken);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('access_token', res.accessToken);
+      localStorage.setItem('refresh_token', res.refreshToken);
+    }
     setUser(res.user);
     router.push('/feed');
   };
@@ -63,8 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authAdapter.logout();
     } finally {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+      }
       setUser(null);
       router.push('/login');
     }
@@ -75,12 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

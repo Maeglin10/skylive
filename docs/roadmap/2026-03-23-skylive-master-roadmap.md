@@ -246,13 +246,15 @@
 
 2. **UX flows**
    - Onboarding to creator
-   - Purchase + paywall states
-   - Empty states + loading + errors
+   - Purchase + paywall states (using premium Modals)
+   - Real-time feedback (Toasts for auth/uploads)
+   - Empty states + loading (Shimmer Skeletons) + errors
 
 3. **Accessibility**
    - Keyboard navigation
    - ARIA labels
    - Contrast checks
+   - Responsive Navigation (Mobile Bottom Bar)
 
 **Exit criteria:**
 - UI consistent and accessible
