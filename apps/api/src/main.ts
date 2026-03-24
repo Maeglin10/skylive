@@ -42,6 +42,7 @@ async function bootstrap() {
     .setTitle('Skylive API')
     .setDescription('Skylive backend API')
     .setVersion('0.1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
