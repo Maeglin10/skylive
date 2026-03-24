@@ -1,4 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { PrismaService } from '../../prisma/prisma.service';
 import { REDIS_CLIENT } from '../redis';
 import type Redis from 'ioredis';
@@ -11,6 +12,7 @@ export class HealthController {
   ) {}
 
   @Get()
+  @SkipThrottle()
   async getHealth() {
     const result: Record<string, unknown> = { status: 'ok' };
 
