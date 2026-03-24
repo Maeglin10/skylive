@@ -201,6 +201,7 @@ model Purchase {
   @@index([userId])
   @@index([contentId])
   @@index([liveSessionId])
+  @@unique([stripePaymentIntentId])
 }
 
 model Tip {
