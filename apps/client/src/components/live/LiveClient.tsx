@@ -2,7 +2,8 @@
 
 import { HLSPlayer } from "@/components/player/HLSPlayer";
 import { ChatPanel } from "@/components/chat/ChatPanel";
-import { Heart, Share2, Users, AlertCircle, Sparkles } from "lucide-react";
+import { PollsOverlay } from "@/components/live/PollsOverlay";
+import { Heart, Share2, Users, AlertCircle, Sparkles, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
 
@@ -12,6 +13,7 @@ interface LiveClientProps {
 
 export function LiveClient({ id }: LiveClientProps) {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isPollOpen, setIsPollOpen] = useState(false);
   const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,6 +50,7 @@ export function LiveClient({ id }: LiveClientProps) {
             src={session.hlsUrl} 
             className="w-full max-w-5xl shadow-[0_20px_80px_-20px_rgba(158,57,141,0.4)] ring-1 ring-white/5"
           />
+          <PollsOverlay isOpen={isPollOpen} onClose={() => setIsPollOpen(false)} />
         </div>
 
         {/* Info Area */}
@@ -94,6 +97,15 @@ export function LiveClient({ id }: LiveClientProps) {
                 className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-all transform hover:-translate-y-1"
               >
                 <Share2 className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setIsPollOpen(!isPollOpen)}
+                className={clsx(
+                   "px-4 py-3 rounded-xl border transition-all transform hover:-translate-y-1",
+                   isPollOpen ? "bg-[#9E398D]/20 border-[#9E398D]/50 text-[#9E398D]" : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                )}
+              >
+                <BarChart3 className="w-4 h-4" />
               </button>
             </div>
           </div>

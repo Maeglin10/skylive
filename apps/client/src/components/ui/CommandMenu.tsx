@@ -11,7 +11,10 @@ import {
   Heart, 
   UserCircle,
   Sparkles,
-  Zap
+  Zap,
+  History,
+  Star,
+  ExternalLink
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,7 +52,7 @@ export function CommandMenu() {
             className="absolute inset-0 bg-black/80 backdrop-blur-md"
           />
           
-          <div className="flex items-start justify-center pt-[20vh] p-4 h-full pointer-events-none">
+          <div className="flex items-start justify-center pt-[15vh] p-4 h-full pointer-events-none">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -61,16 +64,16 @@ export function CommandMenu() {
                    <Search className="w-5 h-5 text-neutral-500" />
                    <Command.Input 
                      autoFocus 
-                     placeholder="Type a command or search..." 
+                     placeholder="Type a command or search creators..." 
                      className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder:text-neutral-600 font-medium"
                    />
-                   <div className="px-2 py-1 rounded-md bg-white/5 border border-white/5 text-[10px] font-black uppercase text-neutral-600">ESC</div>
+                   <div className="px-2 py-1 rounded-md bg-white/5 border border-white/5 text-[10px] font-black uppercase text-neutral-600">⌘K</div>
                 </div>
 
-                <Command.List className="max-h-[400px] overflow-y-auto p-4 scrollbar-hide space-y-2">
+                <Command.List className="max-h-[500px] overflow-y-auto p-4 scrollbar-hide space-y-4">
                   <Command.Empty className="py-12 text-center text-sm text-neutral-500 font-medium">No results found.</Command.Empty>
 
-                  <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-[#9E398D]">Suggestions</span>}>
+                  <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-[#9E398D]">Jump To</span>}>
                     <CommandItem onSelect={() => runCommand(() => router.push('/feed'))}>
                       <Home className="w-4 h-4 mr-3" />
                       <span>Go to Feed</span>
@@ -84,6 +87,22 @@ export function CommandMenu() {
                       <span>Creator Studio</span>
                       <span className="ml-auto text-[10px] font-black uppercase tracking-widest text-[#9E398D]">LIVE</span>
                     </CommandItem>
+                    <CommandItem onSelect={() => runCommand(() => router.push('/help'))}>
+                      <Sparkles className="w-4 h-4 mr-3" />
+                      <span>Help & Support</span>
+                    </CommandItem>
+                  </Command.Group>
+
+                  <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-600">Top Creators</span>}>
+                    <CommandItem onSelect={() => runCommand(() => router.push('/creators/elena'))}>
+                      <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-[8px] font-black text-white italic mr-3">E</div>
+                      <span>Elena Creative</span>
+                      <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#9E398D]/10 text-[#9E398D] text-[8px] font-black tracking-widest uppercase">Live Now</div>
+                    </CommandItem>
+                    <CommandItem onSelect={() => runCommand(() => router.push('/creators/techguru'))}>
+                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-black text-white italic mr-3">T</div>
+                      <span>Tech Guru Pro</span>
+                    </CommandItem>
                   </Command.Group>
 
                   <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-600">Quick Actions</span>}>
@@ -91,27 +110,21 @@ export function CommandMenu() {
                       <PlusSquare className="w-4 h-4 mr-3" />
                       <span>Upload New Post</span>
                     </CommandItem>
-                    <CommandItem onSelect={() => runCommand(() => router.push('/subscriptions'))}>
-                      <Heart className="w-4 h-4 mr-3" />
-                      <span>Show My Subscriptions</span>
+                    <CommandItem onSelect={() => runCommand(() => router.push('/billing'))}>
+                      <Zap className="w-4 h-4 mr-3" />
+                      <span>My Wallet</span>
                     </CommandItem>
                     <CommandItem onSelect={() => runCommand(() => router.push('/settings'))}>
                       <Settings className="w-4 h-4 mr-3" />
-                      <span>Settings</span>
+                      <span>Account Settings</span>
                     </CommandItem>
                   </Command.Group>
 
-                  <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-600">Credits</span>}>
-                    <div className="px-4 py-4 flex items-center justify-between bg-white/5 rounded-2xl border border-white/5 mx-2 my-2">
-                       <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#9E398D]/10 flex items-center justify-center border border-[#9E398D]/20"><Zap className="w-4 h-4 text-[#9E398D]" /></div>
-                          <div className="flex flex-col">
-                             <span className="text-[10px] font-black uppercase text-neutral-400">Current Balance</span>
-                             <span className="text-sm font-black text-white">$42.00</span>
-                          </div>
-                       </div>
-                       <button className="px-4 py-2 rounded-xl gradient-primary text-[10px] font-black uppercase tracking-widest text-white">Top Up</button>
-                    </div>
+                  <Command.Group heading={<span className="px-4 text-[10px] font-black uppercase tracking-widest text-neutral-600">Recent Search</span>}>
+                    <CommandItem onSelect={() => runCommand(() => router.push('/search?q=nextjs'))}>
+                      <History className="w-4 h-4 mr-3 text-neutral-700" />
+                      <span className="text-neutral-500 italic">nextjs 15 streaming...</span>
+                    </CommandItem>
                   </Command.Group>
                 </Command.List>
 
@@ -128,7 +141,7 @@ export function CommandMenu() {
                    </div>
                    <div className="flex items-center gap-2">
                       <Sparkles className="w-3 h-3 text-[#9E398D]" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-700">Skylive OS v0.1.0</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-700">Skylive OS v0.2.0</span>
                    </div>
                 </div>
               </Command>

@@ -3,6 +3,7 @@
 import { LiveCard } from "@/components/feed/LiveCard";
 import { ContentCard } from "@/components/feed/ContentCard";
 import { FeedSkeleton } from "@/components/feed/FeedSkeleton";
+import { LiveStories } from "@/components/feed/LiveStories";
 import { useState, useEffect } from "react";
 import { Sparkles, Video, Grid } from "lucide-react";
 
@@ -75,6 +76,15 @@ export default function FeedPage() {
         <FeedSkeleton />
       ) : (
         <>
+          {/* Stories Section */}
+          <section className="space-y-6 pb-4">
+             <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#9E398D]" />
+                <h2 className="text-sm font-black uppercase tracking-widest text-neutral-400">Live Stories</h2>
+             </div>
+             <LiveStories />
+          </section>
+
           {/* Live Now Section */}
           <section className="space-y-6 animate-fade-in">
             <div className="flex items-center justify-between">
