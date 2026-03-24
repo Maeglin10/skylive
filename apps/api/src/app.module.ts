@@ -21,6 +21,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { MetricsMiddleware } from './metrics/metrics.middleware';
 
 @Module({
   imports: [
@@ -63,6 +64,6 @@ import { ModerationModule } from './moderation/moderation.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestIdMiddleware, RequestTimeoutMiddleware).forRoutes('*');
+    consumer.apply(RequestIdMiddleware, RequestTimeoutMiddleware, MetricsMiddleware).forRoutes('*');
   }
 }
