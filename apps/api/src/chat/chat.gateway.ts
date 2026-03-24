@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
 import { LiveService } from '../live/live.service';
 import { ChatService } from './chat.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient, RedisClientType } from 'redis';
 import { JobsService } from '../jobs/jobs.service';
@@ -40,6 +41,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     private readonly liveService: LiveService,
     private readonly chatService: ChatService,
     private readonly jobsService: JobsService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async afterInit(server: Server) {
@@ -81,6 +83,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
       const payload = this.jwtService.verify<{ sub: string }>(token, {
         secret: process.env.JWT_SECRET || 'dev_secret',
       });
+      const activeBan = await this.prisma.ban.findFirst({
+        where: {
+          userId: payload.sub,
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+      });
+      if (activeBan) {
+        client.disconnect();
+        return;
+      }
       client.data.userId = payload.sub;
     } catch {
       client.disconnect();
