@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
+import * as Sentry from '@sentry/node';
 import { KnownError } from '../errors/known-error';
 
 @Catch()
@@ -30,6 +31,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
         method: request.method,
         statusCode: status,
       });
+
+      if (process.env.SENTRY_DSN) {
+        Sentry.withScope((scope) => {
+          scope.setTag('path', request.url);
+          scope.setTag('method', request.method);
+          scope.setTag('status', String(status));
+          if (request.id) {
+            scope.setExtra('requestId', request.id);
+          }
+          scope.setExtra('ip', request.ip);
+          scope.setExtra('userAgent', request.headers['user-agent']);
+          Sentry.captureException(exception);
+        });
+      }
     }
 
     response.status(status).json({
