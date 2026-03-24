@@ -225,7 +225,12 @@ export class ContentService {
       });
       if (creatorUser) {
         const blocked = await this.prisma.blocklist.findFirst({
-          where: { userId: creatorUser.userId, blockedUserId: userId },
+          where: {
+            OR: [
+              { userId: creatorUser.userId, blockedUserId: userId },
+              { userId: userId, blockedUserId: creatorUser.userId },
+            ],
+          },
         });
         if (blocked) return false;
       }
