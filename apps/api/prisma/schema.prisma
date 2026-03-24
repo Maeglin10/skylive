@@ -57,6 +57,7 @@ enum ReportTargetType {
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
+  googleId      String?        @unique
   passwordHash  String
   displayName   String?
   avatarUrl     String?
