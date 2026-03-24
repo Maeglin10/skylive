@@ -98,6 +98,16 @@ export class AuthService {
       throw new InvalidRefreshTokenError();
     }
 
+    const activeBan = await this.prisma.ban.findFirst({
+      where: {
+        userId: tokenRow.user.id,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+      },
+    });
+    if (activeBan) {
+      throw new UnauthorizedException('User banned');
+    }
+
     await this.prisma.refreshToken.delete({ where: { token: refreshToken } });
 
     const tokens = await this.issueTokens(
