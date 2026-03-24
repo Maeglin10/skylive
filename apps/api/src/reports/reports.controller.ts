@@ -1,4 +1,5 @@
 import { Body, Controller, ForbiddenException, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ReportsService } from './reports.service';
@@ -12,6 +13,7 @@ export class ReportsController {
 
   @UseGuards(JwtAuthGuard)
   @Post('reports')
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   createReport(@CurrentUser() user: { id: string }, @Body() dto: CreateReportDto) {
     return this.reportsService.createReport(user.id, dto);
   }
