@@ -14,7 +14,19 @@ export class MediaController {
   ) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: Number(process.env.MEDIA_MAX_SIZE_MB ?? 50) * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        const allowed = ['image/', 'video/'];
+        if (allowed.some((prefix) => file.mimetype.startsWith(prefix))) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Unsupported file type'), false);
+        }
+      },
+    }),
+  )
   upload(@UploadedFile() file: Express.Multer.File) {
     return this.mediaService.upload(file);
   }
