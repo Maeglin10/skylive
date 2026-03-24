@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, Headers, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { LiveService } from './live.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -41,13 +41,32 @@ export class LiveController {
 
   @Post('webhook/stream-start')
   @SkipThrottle()
-  streamStart(@Body() body: { name: string }) {
+  streamStart(
+    @Body() body: { name: string },
+    @Query('token') token?: string,
+    @Headers('x-stream-secret') headerSecret?: string,
+  ) {
+    this.assertWebhookSecret(token, headerSecret);
     return this.liveService.handleStreamStart(body.name);
   }
 
   @Post('webhook/stream-end')
   @SkipThrottle()
-  streamEnd(@Body() body: { name: string }) {
+  streamEnd(
+    @Body() body: { name: string },
+    @Query('token') token?: string,
+    @Headers('x-stream-secret') headerSecret?: string,
+  ) {
+    this.assertWebhookSecret(token, headerSecret);
     return this.liveService.handleStreamEnd(body.name);
+  }
+
+  private assertWebhookSecret(token?: string, headerSecret?: string) {
+    const expected = process.env.STREAM_WEBHOOK_SECRET;
+    if (!expected) return;
+    const provided = headerSecret || token;
+    if (!provided || provided !== expected) {
+      throw new ForbiddenException('Invalid stream webhook secret');
+    }
   }
 }
