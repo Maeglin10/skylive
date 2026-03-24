@@ -125,12 +125,20 @@ export class ContentService {
       if (creatorUserIds.length > 0) {
         const blocks = await this.prisma.blocklist.findMany({
           where: {
-            userId: { in: creatorUserIds },
-            blockedUserId: userId,
+            OR: [
+              { userId: { in: creatorUserIds }, blockedUserId: userId },
+              { userId: userId, blockedUserId: { in: creatorUserIds } },
+            ],
           },
-          select: { userId: true },
+          select: { userId: true, blockedUserId: true },
         });
-        const blockedCreatorUserIds = new Set(blocks.map((b) => b.userId));
+        const blockedCreatorUserIds = new Set(
+          blocks
+            .map((b) =>
+              b.userId === userId ? b.blockedUserId : b.userId,
+            )
+            .filter(Boolean),
+        );
 
         filteredContent = content.filter(
           (item) => !blockedCreatorUserIds.has(item.creator.userId),
@@ -168,7 +176,12 @@ export class ContentService {
 
     if (userId) {
       const blocked = await this.prisma.blocklist.findFirst({
-        where: { userId: creator.userId, blockedUserId: userId },
+        where: {
+          OR: [
+            { userId: creator.userId, blockedUserId: userId },
+            { userId: userId, blockedUserId: creator.userId },
+          ],
+        },
       });
       if (blocked) {
         return [];
