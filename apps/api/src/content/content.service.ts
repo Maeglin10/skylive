@@ -161,6 +161,19 @@ export class ContentService {
       contentIds: [content.id],
       liveSessionIds: [],
     });
+    if (userId) {
+      const creatorUser = await this.prisma.creator.findUnique({
+        where: { id: content.creatorId },
+        select: { userId: true },
+      });
+      if (creatorUser) {
+        const blocked = await this.prisma.blocklist.findFirst({
+          where: { userId: creatorUser.userId, blockedUserId: userId },
+        });
+        if (blocked) return false;
+      }
+    }
+
     return this.computeContentAccess(content, access).canAccess;
   }
 

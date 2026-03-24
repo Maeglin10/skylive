@@ -173,6 +173,17 @@ export class LiveService {
     if (session.accessRule === 'FREE') return true;
     if (!userId) return false;
 
+    const creatorUser = await this.prisma.creator.findUnique({
+      where: { id: session.creatorId },
+      select: { userId: true },
+    });
+    if (creatorUser) {
+      const blocked = await this.prisma.blocklist.findFirst({
+        where: { userId: creatorUser.userId, blockedUserId: userId },
+      });
+      if (blocked) return false;
+    }
+
     const creator = await this.prisma.creator.findUnique({ where: { userId } });
     if (creator && creator.id === session.creatorId) return true;
 
