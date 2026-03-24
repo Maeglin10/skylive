@@ -1,0 +1,17 @@
+{
+    "name": "Skylive",
+    "short_name": "Skylive",
+    "description": "Premium Live Streaming & Content Platform",
+    "start_url": "/feed",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#9E398D",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

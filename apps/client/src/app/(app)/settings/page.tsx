@@ -1,117 +1,181 @@
 'use client';
 
-import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { User, Bell, Shield, Palette, LayoutDashboard, Camera, Mail, UserCircle } from "lucide-react";
+import { 
+  User, 
+  ShieldCheck, 
+  Bell, 
+  Video, 
+  Globe, 
+  Lock, 
+  Sparkles,
+  Zap,
+  Save,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  UserCircle
+} from "lucide-react";
 import { clsx } from "clsx";
 
 export default function SettingsPage() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'NOTIFS' | 'SECURITY' | 'APPEARANCE'>('PROFILE');
-
-  const SettingSection = ({ href, icon: Icon, label }: any) => {
-    const isActive = activeTab === href;
-    return (
-      <button 
-        onClick={() => setActiveTab(href)}
-        className={clsx(
-          "flex items-center gap-4 px-5 py-4 rounded-xl transition-all font-bold uppercase tracking-widest text-[10px] w-80 text-left group",
-          isActive ? "bg-[#9E398D]/10 text-[#9E398D] border border-[#9E398D]/20 shadow-lg shadow-[#9E398D]/5" : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
-        )}
-      >
-        <Icon className={clsx("w-5 h-5 transition-transform group-hover:scale-105", isActive && "text-[#9E398D]")} />
-        {label}
-      </button>
-    );
-  };
+  const [activeSection, setActiveSection] = useState<'ACCOUNT' | 'PRIVACY' | 'NOTIFICATIONS' | 'CREATOR'>('ACCOUNT');
+  const [showPass, setShowPass] = useState(false);
 
   return (
-    <div className="container max-w-7xl mx-auto p-12 space-y-12 pb-24 animate-fade-in flex gap-12">
-      {/* Sidebar Settings Navigation */}
-      <aside className="space-y-2 sticky top-12 h-fit">
-        <header className="px-5 mb-8">
-          <h1 className="text-3xl font-black tracking-tighter text-white">Settings</h1>
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9E398D] mt-2 group cursor-pointer hover:tracking-[0.3em] transition-all">Control Tower</p>
-        </header>
-        
-        <SettingSection href="PROFILE" icon={User} label="My Profile" />
-        <SettingSection href="NOTIFS" icon={Bell} label="Notifications" />
-        <SettingSection href="SECURITY" icon={Shield} label="Security & Logins" />
-        <SettingSection href="APPEARANCE" icon={Palette} label="Platform View" />
-      </aside>
+    <div className="container max-w-7xl mx-auto p-8 space-y-12 pb-24 animate-fade-in font-sans">
+      {/* Settings Header */}
+      <header className="space-y-1">
+        <h1 className="text-4xl font-black tracking-tight text-white flex items-center gap-3">
+           System Settings <Sparkles className="w-6 h-6 text-[#9E398D]" />
+        </h1>
+        <p className="text-sm text-neutral-400 font-medium tracking-tight">Personalize your experience and manage your security.</p>
+      </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-3xl p-12 space-y-12 shadow-2xl animate-fade-in delay-200 min-h-[70vh]">
-        {activeTab === 'PROFILE' && (
-          <div className="space-y-12 group">
-            <header className="flex items-center justify-between group-hover:translate-x-1 transition-transform">
-               <div>
-                  <h2 className="text-2xl font-black tracking-tight text-white">Public Identity</h2>
-                  <p className="text-sm text-neutral-400 font-medium">How the community sees you on the network.</p>
-               </div>
-               <button className="px-8 py-3 rounded-xl gradient-primary text-white font-black tracking-widest uppercase text-[10px] shadow-[0_10px_30px_-5px_rgba(158,57,141,0.3)] hover:scale-105 active:scale-95 transition-all">
-                  Sync Profile
-               </button>
-            </header>
+      <section className="grid grid-cols-1 lg:grid-cols-4 gap-12">
+        {/* Navigation Sidebar */}
+        <aside className="space-y-4">
+           {[
+              { id: 'ACCOUNT', icon: User, label: 'Profile & Account' },
+              { id: 'PRIVACY', icon: Lock, label: 'Privacy & Security' },
+              { id: 'NOTIFICATIONS', icon: Bell, label: 'Notifications' },
+              { id: 'CREATOR', icon: Video, label: 'Creator Preferences' },
+           ].map((item) => (
+              <button 
+                key={item.id}
+                onClick={() => setActiveSection(item.id as any)}
+                className={clsx(
+                   "w-full flex items-center justify-between px-6 py-4 rounded-2xl transition-all group",
+                   activeSection === item.id ? "bg-[#9E398D]/10 text-[#9E398D] border border-[#9E398D]/20 shadow-xl" : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
+                )}
+              >
+                 <div className="flex items-center gap-4">
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-black uppercase tracking-widest leading-none">{item.label}</span>
+                 </div>
+                 <ChevronRight className={clsx("w-4 h-4 transition-transform", activeSection === item.id ? "translate-x-1" : "opacity-0")} />
+              </button>
+           ))}
+        </aside>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
-               <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Avatar</label>
-                  <div className="aspect-square w-full max-w-[200px] rounded-3xl gradient-primary flex items-center justify-center border-4 border-[#1a1a1a] shadow-2xl relative group/avatar cursor-pointer">
-                     <span className="text-6xl font-black">{user?.displayName?.[0] || 'U'}</span>
-                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center rounded-[2.8rem]">
-                        <Camera className="w-8 h-8 text-white scale-75 group-hover/avatar:scale-100 transition-transform" />
+        {/* Content Area */}
+        <main className="lg:col-span-3 space-y-12 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-12">
+            
+            {activeSection === 'ACCOUNT' && (
+               <div className="space-y-12 animate-fade-in">
+                  <div className="flex flex-col md:flex-row items-center gap-12 pb-8 border-b border-white/5">
+                     <div className="w-32 h-32 rounded-full gradient-primary p-1 shadow-2xl relative group">
+                        <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-4xl font-extrabold text-white">E</div>
+                        <button className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 text-[8px] font-black uppercase tracking-widest">
+                           Change Photo
+                        </button>
+                     </div>
+                     <div className="flex-1 text-center md:text-left space-y-4">
+                        <h3 className="text-2xl font-black text-white tracking-tight">Elena Creative</h3>
+                        <p className="text-neutral-500 text-sm font-medium tracking-tight">Your display name will be visible to all users and in your channel URL.</p>
                      </div>
                   </div>
-                  <p className="text-[10px] text-neutral-600 font-medium">Recommended: 800x800px</p>
+
+                  <form className="space-y-8">
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Display Name</label>
+                           <input type="text" placeholder="Elena Creative" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all" />
+                        </div>
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Email Address</label>
+                           <input type="email" placeholder="elena@skylive.io" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all font-medium" />
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Bio / Description</label>
+                        <textarea placeholder="Digital Artist & Creative Coder..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all h-32 resize-none" />
+                     </div>
+
+                     <div className="pt-8 border-t border-white/5 flex items-center justify-between gap-6">
+                        <button className="px-12 py-5 rounded-2xl gradient-primary text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
+                           Save Changes <Save className="w-4 h-4" />
+                        </button>
+                        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-widest">Last changed: Today, 14:20</p>
+                     </div>
+                  </form>
                </div>
+            )}
 
-               <div className="xl:col-span-2 space-y-8">
+            {activeSection === 'NOTIFICATIONS' && (
+               <div className="space-y-12 animate-fade-in">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Display Name</label>
-                    <div className="relative">
-                      <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                      <input 
-                        defaultValue={user?.displayName || "Elena Zenova"}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#9E398D]/50 transition-all font-sans"
-                      />
-                    </div>
+                     <h3 className="text-2xl font-black text-white tracking-tight">Alert Preferences</h3>
+                     <p className="text-neutral-500 text-sm font-medium tracking-tight">Control how and when you want to be notified by Skylive.</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Public Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                      <input 
-                        defaultValue={user?.email || "elena@example.com"}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-[#9E398D]/50 transition-all font-sans"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">About (Bio)</label>
-                    <textarea 
-                      rows={4}
-                      placeholder="Tell the world what you do..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-4 px-4 text-sm font-medium text-white focus:outline-none focus:border-[#9E398D]/50 transition-all"
-                    />
+                  <div className="space-y-6">
+                     {[
+                        { id: 'n_1', title: 'Live Stream Alerts', desc: 'Notify me when creators I follow go live.', default: true },
+                        { id: 'n_2', title: 'New Premium Content', desc: 'Alert me for new uploads from my subscriptions.', default: true },
+                        { id: 'n_3', title: 'Gift & Tip Notifications', desc: 'Immediate notification when someone supports me.', default: true },
+                        { id: 'n_4', title: 'Email Marketing', desc: 'Receive new features and platform updates.', default: false },
+                     ].map((item) => (
+                        <div key={item.id} className="flex items-center justify-between p-8 rounded-3xl border border-white/5 bg-white/[0.02] group hover:border-[#9E398D]/20 transition-all">
+                           <div className="space-y-1">
+                              <p className="text-sm font-black text-white uppercase tracking-tight">{item.title}</p>
+                              <p className="text-xs text-neutral-500 font-medium tracking-tight">{item.desc}</p>
+                           </div>
+                           <button className={clsx(
+                              "w-12 h-6 rounded-full relative transition-all duration-300",
+                              item.default ? "bg-[#9E398D] shadow-[0_0_15px_-3px_rgba(158,57,141,0.6)]" : "bg-neutral-800"
+                           )}>
+                              <div className={clsx(
+                                 "absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 shadow-lg",
+                                 item.default ? "left-7" : "left-1"
+                              )} />
+                           </button>
+                        </div>
+                     ))}
                   </div>
                </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {/* Other tabs can be empty placeholders or with basic text for now */}
-        {activeTab !== 'PROFILE' && (
-          <div className="flex flex-col items-center justify-center h-full space-y-4">
-             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                <LayoutDashboard className="w-8 h-8 text-neutral-500" />
-             </div>
-             <p className="text-sm font-black uppercase tracking-widest text-neutral-500 italic">Advanced {activeTab.toLowerCase()} settings coming soon.</p>
-          </div>
-        )}
-      </main>
+            {activeSection === 'CREATOR' && (
+               <div className="space-y-12 animate-fade-in">
+                  <div className="space-y-2">
+                     <h3 className="text-2xl font-black text-white tracking-tight">Creator Mode</h3>
+                     <p className="text-neutral-500 text-sm font-medium tracking-tight">Configure your monetization rules and broadcasting settings.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div className="p-8 rounded-3xl border border-[#9E398D]/20 bg-[#9E398D]/5 space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Zap className="w-5 h-5 text-[#9E398D]" />
+                           <p className="text-[10px] font-black uppercase text-[#9E398D] tracking-[0.2em]">Monetization</p>
+                        </div>
+                        <div className="space-y-4">
+                           <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400">Monthly Sub Price</label>
+                              <div className="relative">
+                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">$</span>
+                                 <input type="number" placeholder="9.99" className="w-full bg-black/40 border border-white/10 rounded-2xl pl-8 pr-4 py-4 text-sm focus:outline-none focus:border-[#9E398D] font-black" />
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     <div className="p-8 rounded-3xl border border-white/10 bg-white/5 space-y-6">
+                        <div className="flex items-center gap-3">
+                           <Globe className="w-5 h-5 text-neutral-500" />
+                           <p className="text-[10px] font-black uppercase text-neutral-500 tracking-[0.2em]">Regional Settings</p>
+                        </div>
+                        <p className="text-xs text-neutral-500 font-medium leading-relaxed">Streaming server: <span className="text-white font-black">EU-PARIS-01</span></p>
+                        <button className="w-full py-4 rounded-xl border border-white/10 text-[10px] font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-all">
+                           Run Speed Test
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            )}
+        </main>
+      </section>
     </div>
   );
 }

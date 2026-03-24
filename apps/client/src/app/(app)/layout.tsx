@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { 
   Home, 
@@ -12,12 +12,15 @@ import {
   LogOut, 
   Settings, 
   UserCircle,
-  Video
+  Video,
+  Bell,
+  Command
 } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
 import { useMobile } from "@/hooks/use-mobile";
 import { CommandMenu } from "@/components/ui/CommandMenu";
+import { NotificationsDrawer } from "@/components/notifications/NotificationsDrawer";
 
 function NavItem({ href, icon: Icon, label, isActive }: { href: string; icon: any; label: string; isActive: boolean }) {
   return (
@@ -39,6 +42,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useMobile();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -59,11 +63,20 @@ function AppShell({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       {!isMobile && (
         <aside className="w-64 border-r border-white/5 flex flex-col p-6 space-y-8 bg-[#0a0a0a]">
-          <Link href="/feed" className="px-4">
-            <h1 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#9E398D] to-[#521E49]">
-              SKYLIVE
-            </h1>
-          </Link>
+          <div className="flex items-center justify-between px-4">
+            <Link href="/feed">
+              <h1 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#9E398D] to-[#521E49]">
+                SKYLIVE
+              </h1>
+            </Link>
+            <button 
+              onClick={() => setIsNotifOpen(true)}
+              className="p-2 rounded-xl bg-white/5 border border-white/5 text-neutral-400 hover:text-[#9E398D] transition-all relative group"
+            >
+              <Bell className="w-5 h-5 group-hover:animate-bounce" />
+              <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#9E398D]" />
+            </button>
+          </div>
           
           <nav className="flex-1 space-y-2">
             <NavItem href="/feed" icon={Home} label="Feed" isActive={pathname === '/feed'} />
@@ -122,12 +135,27 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/subscriptions" className={clsx("p-2 rounded-xl transition-all", pathname === '/subscriptions' ? "text-[#9E398D]" : "text-neutral-500")}>
             <Heart className="w-6 h-6" />
           </Link>
-          <Link href="/settings" className={clsx("p-2 rounded-xl transition-all", pathname === '/settings' ? "text-[#9E398D]" : "text-neutral-500")}>
-            <UserCircle className="w-6 h-6" />
-          </Link>
+          <button 
+            onClick={() => setIsNotifOpen(true)}
+            className={clsx("p-2 rounded-xl transition-all relative", isNotifOpen ? "text-[#9E398D]" : "text-neutral-500")}
+          >
+            <Bell className="w-6 h-6" />
+            <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#9E398D]" />
+          </button>
         </nav>
       )}
       <CommandMenu />
+      <NotificationsDrawer isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+      
+      {/* Floating Action Button for Command Menu (Expert Mode) */}
+      {!isMobile && (
+        <button 
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-[#9E398D] hover:border-[#9E398D]/50 transition-all flex items-center justify-center group shadow-2xl backdrop-blur-md"
+        >
+           <Command className="w-5 h-5 group-hover:scale-110 transition-transform" />
+        </button>
+      )}
     </div>
   );
 }

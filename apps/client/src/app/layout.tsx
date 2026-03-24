@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata: Metadata = {
   title: "Skylive",
   description: "Live Streaming & Content Platform",
+  manifest: "/manifest.json",
+  icons: {
+    apple: "/icon.png",
+  },
+  themeColor: "#9E398D",
 };
 
 export default function RootLayout({
