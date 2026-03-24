@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
@@ -153,26 +154,40 @@ export class PaymentsService {
     const metadata = intent.metadata || {};
 
     if (metadata.type === 'content' && metadata.contentId) {
-      await this.prisma.purchase.create({
-        data: {
-          userId: metadata.userId,
-          contentId: metadata.contentId,
-          amount: intent.amount,
-          stripePaymentIntentId: intent.id,
-        },
-      });
+      try {
+        await this.prisma.purchase.create({
+          data: {
+            userId: metadata.userId,
+            contentId: metadata.contentId,
+            amount: intent.amount,
+            stripePaymentIntentId: intent.id,
+          },
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          return;
+        }
+        throw error;
+      }
       return;
     }
 
     if (metadata.type === 'live' && metadata.liveSessionId) {
-      await this.prisma.purchase.create({
-        data: {
-          userId: metadata.userId,
-          liveSessionId: metadata.liveSessionId,
-          amount: intent.amount,
-          stripePaymentIntentId: intent.id,
-        },
-      });
+      try {
+        await this.prisma.purchase.create({
+          data: {
+            userId: metadata.userId,
+            liveSessionId: metadata.liveSessionId,
+            amount: intent.amount,
+            stripePaymentIntentId: intent.id,
+          },
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          return;
+        }
+        throw error;
+      }
       return;
     }
 
