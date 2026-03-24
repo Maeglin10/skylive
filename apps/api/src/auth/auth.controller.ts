@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { GoogleProfile } from './strategies/google.strategy';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +23,21 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60 } })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {
+    return { success: true };
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleCallback(@Req() req: { user?: GoogleProfile }) {
+    if (!req.user) {
+      return { error: 'Google auth failed' };
+    }
+    return this.authService.loginWithGoogle(req.user);
   }
 
   @Post('refresh')

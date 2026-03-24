@@ -12,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { InvalidRefreshTokenError } from '../common/errors/known-error';
 import { JobsService } from '../jobs/jobs.service';
+import { GoogleProfile } from './strategies/google.strategy';
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -131,6 +132,47 @@ export class AuthService {
     if (!refreshToken) return { success: true };
     await this.prisma.refreshToken.deleteMany({ where: { token: refreshToken } });
     return { success: true };
+  }
+
+  async loginWithGoogle(profile: GoogleProfile) {
+    let user = await this.prisma.user.findUnique({
+      where: { googleId: profile.googleId },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.findUnique({ where: { email: profile.email } });
+    }
+
+    if (!user) {
+      const randomPassword = randomBytes(48).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, BCRYPT_SALT_ROUNDS);
+      user = await this.prisma.user.create({
+        data: {
+          email: profile.email,
+          googleId: profile.googleId,
+          passwordHash,
+          displayName: profile.displayName ?? null,
+        },
+      });
+    } else if (!user.googleId) {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { googleId: profile.googleId },
+      });
+    }
+
+    const tokens = await this.issueTokens(user.id, user.email, user.role);
+    await this.jobsService.trackEvent('auth.google', { userId: user.id });
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+      },
+    };
   }
 
   private async issueTokens(userId: string, email: string, role: string): Promise<AuthTokens> {
