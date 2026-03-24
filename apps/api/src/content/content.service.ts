@@ -109,18 +109,50 @@ export class ContentService {
       },
     });
 
+    let filteredContent = content;
+    let filteredLive = liveSessions;
+
+    if (userId) {
+      const creatorUserIds = Array.from(
+        new Set(
+          [
+            ...content.map((item) => item.creator.userId),
+            ...liveSessions.map((item) => item.creator.userId),
+          ].filter(Boolean),
+        ),
+      );
+
+      if (creatorUserIds.length > 0) {
+        const blocks = await this.prisma.blocklist.findMany({
+          where: {
+            userId: { in: creatorUserIds },
+            blockedUserId: userId,
+          },
+          select: { userId: true },
+        });
+        const blockedCreatorUserIds = new Set(blocks.map((b) => b.userId));
+
+        filteredContent = content.filter(
+          (item) => !blockedCreatorUserIds.has(item.creator.userId),
+        );
+        filteredLive = liveSessions.filter(
+          (item) => !blockedCreatorUserIds.has(item.creator.userId),
+        );
+      }
+    }
+
     const access = await this.buildAccessContext(userId, {
-      contentIds: content.map((item) => item.id),
-      liveSessionIds: liveSessions.map((item) => item.id),
+      contentIds: filteredContent.map((item) => item.id),
+      liveSessionIds: filteredLive.map((item) => item.id),
     });
 
     return {
       pagination: { page, limit },
-      content: content.map((item) => ({
+      content: filteredContent.map((item) => ({
         ...item,
         access: this.computeContentAccess(item, access),
       })),
-      liveSessions: liveSessions.map((item) => ({
+      liveSessions: filteredLive.map((item) => ({
         ...item,
         access: this.computeLiveAccess(item, access),
       })),
@@ -128,8 +160,20 @@ export class ContentService {
   }
 
   async getCreatorContent(userId: string | null, username: string, pagination: PaginationDto) {
-    const creator = await this.prisma.creator.findUnique({ where: { username } });
+    const creator = await this.prisma.creator.findUnique({
+      where: { username },
+      select: { id: true, userId: true },
+    });
     if (!creator) throw new NotFoundException('Creator not found');
+
+    if (userId) {
+      const blocked = await this.prisma.blocklist.findFirst({
+        where: { userId: creator.userId, blockedUserId: userId },
+      });
+      if (blocked) {
+        return [];
+      }
+    }
 
     const page = pagination.page ?? 1;
     const limit = pagination.limit ?? 20;
