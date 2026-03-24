@@ -12,9 +12,17 @@ export class JobsService implements OnModuleInit {
   async onModuleInit() {
     const existing = await this.maintenanceQueue.getRepeatableJobs();
     const hasCleanup = existing.some((job) => job.name === 'banCleanup');
+    const hasRefreshCleanup = existing.some((job) => job.name === 'refreshTokenCleanup');
     if (!hasCleanup) {
       await this.maintenanceQueue.add(
         'banCleanup',
+        {},
+        { repeat: { every: 60 * 60 * 1000 }, removeOnComplete: true },
+      );
+    }
+    if (!hasRefreshCleanup) {
+      await this.maintenanceQueue.add(
+        'refreshTokenCleanup',
         {},
         { repeat: { every: 60 * 60 * 1000 }, removeOnComplete: true },
       );
