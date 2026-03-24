@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { HealthModule } from './common/health/health.module';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { RequestTimeoutMiddleware } from './common/middleware/request-timeout.middleware';
+import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { ApiThrottlerGuard } from './common/guards/api-throttler.guard';
 import { BullModule } from '@nestjs/bull';
 import { JobsModule } from './jobs/jobs.module';
@@ -66,6 +67,8 @@ import { EventsModule } from './events/events.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestIdMiddleware, RequestTimeoutMiddleware, MetricsMiddleware).forRoutes('*');
+    consumer
+      .apply(RequestIdMiddleware, RequestTimeoutMiddleware, MetricsMiddleware, RequestLoggerMiddleware)
+      .forRoutes('*');
   }
 }
