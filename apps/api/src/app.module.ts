@@ -22,6 +22,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { ReportsModule } from './reports/reports.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { MetricsMiddleware } from './metrics/metrics.middleware';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { MetricsMiddleware } from './metrics/metrics.middleware';
     MetricsModule,
     ReportsModule,
     ModerationModule,
+    EventsModule,
   ],
   providers: [
     {
