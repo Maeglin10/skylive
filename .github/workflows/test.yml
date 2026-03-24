@@ -1,0 +1,79 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: skylive
+          POSTGRES_PASSWORD: skylive_test
+          POSTGRES_DB: skylive_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: apps/api/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm prisma generate
+        env:
+          DATABASE_URL: postgresql://skylive:skylive_test@localhost:5432/skylive_test
+      - run: pnpm prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://skylive:skylive_test@localhost:5432/skylive_test
+      - run: pnpm test --coverage
+        env:
+          DATABASE_URL: postgresql://skylive:skylive_test@localhost:5432/skylive_test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-jwt-secret-32-chars-minimum
+          JWT_REFRESH_SECRET: test-refresh-secret-32-chars-min
+          STRIPE_SECRET_KEY: sk_test_dummy
+          STRIPE_WEBHOOK_SECRET: whsec_dummy
+          NODE_ENV: test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter api lint
+      - run: pnpm --filter client lint

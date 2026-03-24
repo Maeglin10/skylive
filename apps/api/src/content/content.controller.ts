@@ -19,8 +19,11 @@ export class ContentController {
 
   @UseGuards(OptionalJwtAuthGuard)
   @Get('content/:id')
-  getById(@CurrentUser() user: { id: string } | null, @Param('id') id: string) {
-    return this.contentService.getById(user?.id ?? null, id);
+  getById(
+    @CurrentUser() user: { id: string; role: string } | null,
+    @Param('id') id: string,
+  ) {
+    return this.contentService.getById(user, id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -42,19 +45,19 @@ export class ContentController {
   @UseGuards(OptionalJwtAuthGuard)
   @Get('feed')
   feed(
-    @CurrentUser() user: { id: string } | null,
+    @CurrentUser() user: { id: string; role: string } | null,
     @Query() pagination: PaginationDto,
   ) {
-    return this.contentService.getFeed(user?.id ?? null, pagination);
+    return this.contentService.getFeed(user, pagination);
   }
 
   @Get('creators/:username/content')
   @UseGuards(OptionalJwtAuthGuard)
   getCreatorContent(
-    @CurrentUser() user: { id: string } | null,
+    @CurrentUser() user: { id: string; role: string } | null,
     @Param('username') username: string,
     @Query() pagination: PaginationDto,
   ) {
-    return this.contentService.getCreatorContent(user?.id ?? null, username, pagination);
+    return this.contentService.getCreatorContent(user, username, pagination);
   }
 }

@@ -115,6 +115,9 @@ model Content {
   text       String?
   accessRule AccessRule  @default(FREE)
   price      Int?
+  isHidden   Boolean     @default(false)
+  hiddenReason String?
+  hiddenAt   DateTime?
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 

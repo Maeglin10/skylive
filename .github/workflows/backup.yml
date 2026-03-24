@@ -1,0 +1,29 @@
+name: Database Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Daily at 3am UTC
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  backup:
+    name: Backup PostgreSQL to S3
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run backup via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/skylive
+            DATABASE_URL=${{ secrets.DATABASE_URL }} \
+            S3_BUCKET=${{ secrets.S3_BUCKET }} \
+            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            AWS_REGION=${{ secrets.AWS_REGION }} \
+            bash scripts/backup-db.sh

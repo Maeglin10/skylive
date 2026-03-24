@@ -1,0 +1,34 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [] # add test job name here once tests exist
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/skylive
+            git pull origin main
+            docker compose pull
+            docker compose up -d --build --remove-orphans
+            docker compose exec -T api npx prisma migrate deploy
+            docker system prune -f
+            echo "Deploy completed at $(date)"
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f https://${{ secrets.DOMAIN }}/api/health || exit 1

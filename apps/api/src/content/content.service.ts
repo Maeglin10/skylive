@@ -42,14 +42,22 @@ export class ContentService {
     return content;
   }
 
-  async getById(userId: string | null, contentId: string) {
+  async getById(user: { id: string; role: string } | null, contentId: string) {
     const content = await this.prisma.content.findUnique({
       where: { id: contentId },
       include: { creator: true },
     });
     if (!content) throw new NotFoundException('Content not found');
 
-    const hasAccess = await this.checkAccess(userId, content);
+    if (
+      content.isHidden &&
+      user?.role !== 'ADMIN' &&
+      user?.id !== content.creator.userId
+    ) {
+      throw new NotFoundException('Content not found');
+    }
+
+    const hasAccess = await this.checkAccess(user?.id ?? null, content);
     if (!hasAccess) throw new ForbiddenException('Access denied');
 
     return content;
@@ -82,12 +90,13 @@ export class ContentService {
     return { success: true };
   }
 
-  async getFeed(userId: string | null, pagination: PaginationDto) {
+  async getFeed(user: { id: string; role: string } | null, pagination: PaginationDto) {
     const page = pagination.page ?? 1;
     const limit = pagination.limit ?? 20;
     const skip = (page - 1) * limit;
 
     const content = await this.prisma.content.findMany({
+      where: user?.role === 'ADMIN' ? undefined : { isHidden: false },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip,
@@ -112,7 +121,7 @@ export class ContentService {
     let filteredContent = content;
     let filteredLive = liveSessions;
 
-    if (userId) {
+    if (user?.id) {
       const creatorUserIds = Array.from(
         new Set(
           [
@@ -126,8 +135,8 @@ export class ContentService {
         const blocks = await this.prisma.blocklist.findMany({
           where: {
             OR: [
-              { userId: { in: creatorUserIds }, blockedUserId: userId },
-              { userId: userId, blockedUserId: { in: creatorUserIds } },
+              { userId: { in: creatorUserIds }, blockedUserId: user.id },
+              { userId: user.id, blockedUserId: { in: creatorUserIds } },
             ],
           },
           select: { userId: true, blockedUserId: true },
@@ -135,7 +144,7 @@ export class ContentService {
         const blockedCreatorUserIds = new Set(
           blocks
             .map((b) =>
-              b.userId === userId ? b.blockedUserId : b.userId,
+              b.userId === user.id ? b.blockedUserId : b.userId,
             )
             .filter(Boolean),
         );
@@ -149,7 +158,7 @@ export class ContentService {
       }
     }
 
-    const access = await this.buildAccessContext(userId, {
+    const access = await this.buildAccessContext(user?.id ?? null, {
       contentIds: filteredContent.map((item) => item.id),
       liveSessionIds: filteredLive.map((item) => item.id),
     });
@@ -167,19 +176,23 @@ export class ContentService {
     };
   }
 
-  async getCreatorContent(userId: string | null, username: string, pagination: PaginationDto) {
+  async getCreatorContent(
+    user: { id: string; role: string } | null,
+    username: string,
+    pagination: PaginationDto,
+  ) {
     const creator = await this.prisma.creator.findUnique({
       where: { username },
       select: { id: true, userId: true },
     });
     if (!creator) throw new NotFoundException('Creator not found');
 
-    if (userId) {
+    if (user?.id) {
       const blocked = await this.prisma.blocklist.findFirst({
         where: {
           OR: [
-            { userId: creator.userId, blockedUserId: userId },
-            { userId: userId, blockedUserId: creator.userId },
+            { userId: creator.userId, blockedUserId: user.id },
+            { userId: user.id, blockedUserId: creator.userId },
           ],
         },
       });
@@ -192,14 +205,17 @@ export class ContentService {
     const limit = pagination.limit ?? 20;
     const skip = (page - 1) * limit;
 
+    const canSeeHidden =
+      user?.role === 'ADMIN' || (user?.id && user.id === creator.userId);
+
     const content = await this.prisma.content.findMany({
-      where: { creatorId: creator.id },
+      where: canSeeHidden ? { creatorId: creator.id } : { creatorId: creator.id, isHidden: false },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip,
     });
 
-    const access = await this.buildAccessContext(userId, {
+    const access = await this.buildAccessContext(user?.id ?? null, {
       contentIds: content.map((item) => item.id),
       liveSessionIds: [],
     });
