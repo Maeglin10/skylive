@@ -5,6 +5,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { MagicLinkRequestDto } from './dto/magic-link-request.dto';
+import { MagicLinkVerifyDto } from './dto/magic-link-verify.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { GoogleProfile } from './strategies/google.strategy';
@@ -49,6 +51,18 @@ export class AuthController {
   @Post('logout')
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
+  }
+
+  @Post('magic/request')
+  @Throttle({ default: { limit: 5, ttl: 60 } })
+  requestMagicLink(@Body() dto: MagicLinkRequestDto) {
+    return this.authService.requestMagicLink(dto.email);
+  }
+
+  @Post('magic/verify')
+  @Throttle({ default: { limit: 10, ttl: 60 } })
+  verifyMagicLink(@Body() dto: MagicLinkVerifyDto) {
+    return this.authService.verifyMagicLink(dto.token);
   }
 
   @UseGuards(JwtAuthGuard)

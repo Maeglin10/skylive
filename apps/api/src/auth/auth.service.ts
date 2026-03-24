@@ -134,6 +134,76 @@ export class AuthService {
     return { success: true };
   }
 
+  async requestMagicLink(email: string) {
+    const token = randomBytes(48).toString('hex');
+    const ttlMinutes = Number(process.env.MAGIC_LINK_TTL_MINUTES || 15);
+    const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
+
+    await this.prisma.magicLink.create({
+      data: {
+        email,
+        token,
+        expiresAt,
+      },
+    });
+
+    return {
+      success: true,
+      ...(process.env.NODE_ENV !== 'production' ? { token } : {}),
+    };
+  }
+
+  async verifyMagicLink(token: string) {
+    const link = await this.prisma.magicLink.findUnique({ where: { token } });
+    if (!link || link.expiresAt < new Date() || link.usedAt) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    const existing = await this.prisma.user.findUnique({ where: { email: link.email } });
+    if (existing) {
+      const activeBan = await this.prisma.ban.findFirst({
+        where: {
+          userId: existing.id,
+          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+        },
+      });
+      if (activeBan) {
+        throw new UnauthorizedException('User banned');
+      }
+    }
+
+    await this.prisma.magicLink.update({
+      where: { token },
+      data: { usedAt: new Date() },
+    });
+
+    let user = existing;
+    if (!user) {
+      const randomPassword = randomBytes(48).toString('hex');
+      const passwordHash = await bcrypt.hash(randomPassword, BCRYPT_SALT_ROUNDS);
+      user = await this.prisma.user.create({
+        data: {
+          email: link.email,
+          passwordHash,
+          displayName: null,
+        },
+      });
+    }
+
+    const tokens = await this.issueTokens(user.id, user.email, user.role);
+    await this.jobsService.trackEvent('auth.magic', { userId: user.id });
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+      },
+    };
+  }
+
   async loginWithGoogle(profile: GoogleProfile) {
     let user = await this.prisma.user.findUnique({
       where: { googleId: profile.googleId },
