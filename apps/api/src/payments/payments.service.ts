@@ -192,15 +192,23 @@ export class PaymentsService {
     }
 
     if (metadata.type === 'tip' && metadata.creatorId) {
-      await this.prisma.tip.create({
-        data: {
-          userId: metadata.userId,
-          creatorId: metadata.creatorId,
-          liveSessionId: metadata.liveSessionId || null,
-          amount: intent.amount,
-          message: metadata.message || null,
-        },
-      });
+      try {
+        await this.prisma.tip.create({
+          data: {
+            userId: metadata.userId,
+            creatorId: metadata.creatorId,
+            liveSessionId: metadata.liveSessionId || null,
+            amount: intent.amount,
+            message: metadata.message || null,
+            stripePaymentIntentId: intent.id,
+          },
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          return;
+        }
+        throw error;
+      }
     }
   }
 

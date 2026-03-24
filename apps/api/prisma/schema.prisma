@@ -211,6 +211,7 @@ model Tip {
   liveSessionId String?
   amount        Int
   message       String?
+  stripePaymentIntentId String?
   createdAt     DateTime @default(now())
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -220,6 +221,7 @@ model Tip {
   @@index([userId])
   @@index([creatorId])
   @@index([liveSessionId])
+  @@unique([stripePaymentIntentId])
 }
 
 model Report {
