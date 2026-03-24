@@ -23,15 +23,34 @@ export class ChatService {
     });
   }
 
-  async getMessages(liveSessionId: string) {
+  async getMessages(liveSessionId: string, viewerId?: string) {
     const chatRoom = await this.prisma.chatRoom.findUnique({
       where: { liveSessionId },
     });
 
     if (!chatRoom) throw new NotFoundException('Chat room not found');
 
+    let blockedIds: string[] = [];
+    if (viewerId) {
+      const blocks = await this.prisma.blocklist.findMany({
+        where: {
+          OR: [
+            { userId: viewerId },
+            { blockedUserId: viewerId },
+          ],
+        },
+        select: { userId: true, blockedUserId: true },
+      });
+      blockedIds = blocks
+        .map((b) => (b.userId === viewerId ? b.blockedUserId : b.userId))
+        .filter(Boolean);
+    }
+
     return this.prisma.message.findMany({
-      where: { chatRoomId: chatRoom.id },
+      where: {
+        chatRoomId: chatRoom.id,
+        ...(blockedIds.length > 0 ? { NOT: { userId: { in: blockedIds } } } : {}),
+      },
       orderBy: { createdAt: 'asc' },
       take: 200,
     });

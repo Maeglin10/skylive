@@ -130,7 +130,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     this.viewers.get(payload.liveSessionId)!.add(client.id);
     this.emitViewerCount(payload.liveSessionId);
 
-    const messages = await this.chatService.getMessages(payload.liveSessionId).catch(() => []);
+    const messages = await this.chatService
+      .getMessages(payload.liveSessionId, userId)
+      .catch(() => []);
     client.emit('chat:history', messages);
   }
 
