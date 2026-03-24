@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MediaService } from './media.service';
 import { ContentService } from '../content/content.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('media')
 @UseGuards(JwtAuthGuard)
@@ -14,6 +15,7 @@ export class MediaController {
   ) {}
 
   @Post('upload')
+  @Throttle({ default: { limit: 5, ttl: 60 } })
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: Number(process.env.MEDIA_MAX_SIZE_MB ?? 50) * 1024 * 1024 },
