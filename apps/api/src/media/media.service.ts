@@ -50,7 +50,8 @@ export class MediaService {
       Key: key,
     });
 
-    const url = await getSignedUrl(this.s3, command, { expiresIn: 900 });
+    const ttl = Number(process.env.SIGNED_URL_TTL_SEC ?? 900);
+    const url = await getSignedUrl(this.s3, command, { expiresIn: ttl });
     return { url };
   }
 }
