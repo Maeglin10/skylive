@@ -69,4 +69,45 @@ describe('PaymentsService', () => {
 
     expect(prisma.purchase.create).toHaveBeenCalled();
   });
+
+  it('handles webhook tip creation', async () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    (service as any).stripe.webhooks.constructEvent.mockReturnValue({
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: 'pi_tip',
+          amount: 300,
+          metadata: {
+            type: 'tip',
+            creatorId: 'creator-1',
+            userId: 'user-1',
+            message: 'Thanks!',
+          },
+        },
+      },
+    });
+
+    await service.handleWebhook('sig', Buffer.from('payload'));
+
+    expect(prisma.tip.create).toHaveBeenCalled();
+  });
+
+  it('handles webhook subscription updates', async () => {
+    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test';
+    (service as any).stripe.webhooks.constructEvent.mockReturnValue({
+      type: 'customer.subscription.updated',
+      data: {
+        object: {
+          id: 'sub_123',
+          status: 'active',
+          metadata: { creatorId: 'creator-1', userId: 'user-1' },
+        },
+      },
+    });
+
+    await service.handleWebhook('sig', Buffer.from('payload'));
+
+    expect(prisma.subscription.upsert).toHaveBeenCalled();
+  });
 });
