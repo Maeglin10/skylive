@@ -1,26 +1,53 @@
 'use client';
 
-import { useState } from "react";
-import { 
-  User, 
-  ShieldCheck, 
-  Bell, 
-  Video, 
-  Globe, 
-  Lock, 
+import { useState, FormEvent } from "react";
+import {
+  User,
+  ShieldCheck,
+  Bell,
+  Video,
+  Globe,
+  Lock,
   Sparkles,
   Zap,
   Save,
   ChevronRight,
   Eye,
   EyeOff,
-  UserCircle
+  UserCircle,
+  Loader2
 } from "lucide-react";
 import { clsx } from "clsx";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<'ACCOUNT' | 'PRIVACY' | 'NOTIFICATIONS' | 'CREATOR'>('ACCOUNT');
   const [showPass, setShowPass] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSaveChanges = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (!displayName.trim()) {
+      toast.error('Display name cannot be empty');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await apiClient.patch('/users/me', { displayName });
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container max-w-7xl mx-auto p-8 space-y-12 pb-24 animate-fade-in font-sans">
@@ -65,39 +92,61 @@ export default function SettingsPage() {
                <div className="space-y-12 animate-fade-in">
                   <div className="flex flex-col md:flex-row items-center gap-12 pb-8 border-b border-white/5">
                      <div className="w-32 h-32 rounded-full gradient-primary p-1 shadow-2xl relative group">
-                        <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-4xl font-extrabold text-white">E</div>
+                        <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-4xl font-extrabold text-white">
+                           {user?.displayName?.[0]?.toUpperCase() || 'U'}
+                        </div>
                         <button className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 text-[8px] font-black uppercase tracking-widest">
                            Change Photo
                         </button>
                      </div>
                      <div className="flex-1 text-center md:text-left space-y-4">
-                        <h3 className="text-2xl font-black text-white tracking-tight">Elena Creative</h3>
+                        <h3 className="text-2xl font-black text-white tracking-tight">{user?.displayName || 'User'}</h3>
                         <p className="text-neutral-500 text-sm font-medium tracking-tight">Your display name will be visible to all users and in your channel URL.</p>
                      </div>
                   </div>
 
-                  <form className="space-y-8">
+                  <form onSubmit={handleSaveChanges} className="space-y-8">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-2">
                            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Display Name</label>
-                           <input type="text" placeholder="Elena Creative" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all" />
+                           <input
+                             type="text"
+                             value={displayName}
+                             onChange={(e) => setDisplayName(e.target.value)}
+                             placeholder="Your display name"
+                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all"
+                           />
                         </div>
                         <div className="space-y-2">
                            <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Email Address</label>
-                           <input type="email" placeholder="elena@skylive.io" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all font-medium" />
+                           <input
+                             type="email"
+                             value={user?.email || ''}
+                             readOnly
+                             placeholder="your@email.com"
+                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none font-medium opacity-50 cursor-not-allowed"
+                           />
                         </div>
-                     </div>
-                     
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-neutral-500 px-4">Bio / Description</label>
-                        <textarea placeholder="Digital Artist & Creative Coder..." className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#9E398D]/50 transition-all h-32 resize-none" />
                      </div>
 
                      <div className="pt-8 border-t border-white/5 flex items-center justify-between gap-6">
-                        <button className="px-12 py-5 rounded-2xl gradient-primary text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3">
-                           Save Changes <Save className="w-4 h-4" />
+                        <button
+                          type="submit"
+                          disabled={isLoading}
+                          className="px-12 py-5 rounded-2xl gradient-primary text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3"
+                        >
+                           {isLoading ? (
+                             <>
+                               <Loader2 className="w-4 h-4 animate-spin" />
+                               Saving...
+                             </>
+                           ) : (
+                             <>
+                               Save Changes <Save className="w-4 h-4" />
+                             </>
+                           )}
                         </button>
-                        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-widest">Last changed: Today, 14:20</p>
+                        <p className="text-[10px] text-neutral-600 font-black uppercase tracking-widest">Changes saved automatically</p>
                      </div>
                   </form>
                </div>

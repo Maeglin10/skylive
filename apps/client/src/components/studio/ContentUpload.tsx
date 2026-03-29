@@ -3,9 +3,12 @@
 import { useState, useRef } from "react";
 import { Upload, X, ImageIcon, VideoIcon, FileTextIcon, Lock, DollarSign, Loader2 } from "lucide-react";
 import { clsx } from "clsx";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api/client";
 
 export function ContentUpload() {
   const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [accessRule, setAccessRule] = useState<'FREE' | 'SUBSCRIPTION' | 'PPV'>('FREE');
   const [price, setPrice] = useState("");
@@ -17,13 +20,51 @@ export function ContentUpload() {
     }
   };
 
-  const handleUpload = () => {
+  const getContentType = (file: File): 'IMAGE' | 'VIDEO' | 'POST' => {
+    if (file.type.startsWith('image/')) return 'IMAGE';
+    if (file.type.startsWith('video/')) return 'VIDEO';
+    return 'POST';
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast.error('Please select a file');
+      return;
+    }
+
+    if (accessRule === 'PPV' && !price) {
+      toast.error('Please set a price for PPV content');
+      return;
+    }
+
     setIsUploading(true);
-    // Simulate upload
-    setTimeout(() => {
-      setIsUploading(false);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title || file.name);
+      formData.append('type', getContentType(file));
+      formData.append('accessRule', accessRule);
+
+      if (accessRule === 'PPV' && price) {
+        formData.append('price', price);
+      }
+
+      await apiClient.post('/content', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      toast.success('Content published successfully!');
       setFile(null);
-    }, 2000);
+      setTitle("");
+      setPrice("");
+      setAccessRule('FREE');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload content. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -35,6 +76,18 @@ export function ContentUpload() {
       </div>
 
       <div className="space-y-6">
+        {/* Title Input */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">Content Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter content title"
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm font-bold text-white focus:outline-none focus:border-[#9E398D]/50 transition-all"
+          />
+        </div>
+
         {/* Upload Dropzone */}
         {!file ? (
           <div 

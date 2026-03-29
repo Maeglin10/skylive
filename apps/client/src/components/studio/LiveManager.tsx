@@ -1,17 +1,79 @@
 'use client';
 
-import { useState } from "react";
-import { Copy, Eye, EyeOff, Play, Square, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Copy, Eye, EyeOff, Play, Square, Settings, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { liveAdapter } from "@/lib/api/live.adapter";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LiveManager() {
+  const { user } = useAuth();
   const [showStreamKey, setShowStreamKey] = useState(false);
   const [isLive, setIsLive] = useState(false);
-  const streamKey = "live_550e8400-e29b-41d4-a716-446655440000";
-  const serverUrl = "rtmp://localhost:1935/live";
+  const [isLoading, setIsLoading] = useState(false);
+  const [streamKey, setStreamKey] = useState("live_550e8400-e29b-41d4-a716-446655440000");
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  const serverUrl = process.env.NEXT_PUBLIC_RTMP_URL || 'rtmp://localhost:1935/live';
+
+  useEffect(() => {
+    const checkLiveStatus = async () => {
+      if (!user) return;
+      try {
+        const sessions = await liveAdapter.getSessions('LIVE');
+        if (sessions.length > 0) {
+          setIsLive(true);
+          setSessionId(sessions[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to check live status:', error);
+      }
+    };
+
+    checkLiveStatus();
+  }, [user]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // Add toast notification later
+    toast.success('Copied to clipboard!');
+  };
+
+  const handleGoLive = async () => {
+    if (!user || !sessionId) {
+      toast.error('Unable to start live session');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await liveAdapter.startLive(sessionId);
+      setIsLive(true);
+      toast.success('You are now live!');
+    } catch (error) {
+      console.error('Failed to start live:', error);
+      toast.error('Failed to start live session');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEndLive = async () => {
+    if (!sessionId) {
+      toast.error('No active session');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await liveAdapter.endLive(sessionId);
+      setIsLive(false);
+      toast.success('Live stream ended');
+    } catch (error) {
+      console.error('Failed to end live:', error);
+      toast.error('Failed to end live session');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -76,20 +138,40 @@ export function LiveManager() {
 
       <div className="pt-6 border-t border-white/5 flex gap-4">
         {!isLive ? (
-          <button 
-            onClick={() => setIsLive(true)}
-            className="flex-1 py-4 rounded-xl gradient-primary text-white font-black tracking-widest uppercase text-sm shadow-[0_10px_30px_-5px_rgba(158,57,141,0.4)] hover:scale-[1.02] transition-all hover:shadow-[0_15px_40px_-5px_rgba(158,57,141,0.6)] flex items-center justify-center gap-3"
+          <button
+            onClick={handleGoLive}
+            disabled={isLoading || !sessionId}
+            className="flex-1 py-4 rounded-xl gradient-primary text-white font-black tracking-widest uppercase text-sm shadow-[0_10px_30px_-5px_rgba(158,57,141,0.4)] hover:scale-[1.02] transition-all hover:shadow-[0_15px_40px_-5px_rgba(158,57,141,0.6)] disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3"
           >
-            <Play className="w-5 h-5 fill-current" />
-            Go Live Now
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Starting...
+              </>
+            ) : (
+              <>
+                <Play className="w-5 h-5 fill-current" />
+                Go Live Now
+              </>
+            )}
           </button>
         ) : (
-          <button 
-            onClick={() => setIsLive(false)}
-            className="flex-1 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-black tracking-widest uppercase text-sm hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-3"
+          <button
+            onClick={handleEndLive}
+            disabled={isLoading}
+            className="flex-1 py-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 font-black tracking-widest uppercase text-sm hover:bg-red-500 hover:text-white transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
-            <Square className="w-5 h-5 fill-current" />
-            End Stream
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Stopping...
+              </>
+            ) : (
+              <>
+                <Square className="w-5 h-5 fill-current" />
+                End Stream
+              </>
+            )}
           </button>
         )}
       </div>

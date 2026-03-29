@@ -1,29 +1,38 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { 
-  Users, 
-  TrendingUp, 
-  BarChart3, 
-  ShieldAlert, 
-  DollarSign, 
-  Eye, 
+import {
+  Users,
+  TrendingUp,
+  BarChart3,
+  ShieldAlert,
+  DollarSign,
+  Eye,
   Activity,
   Zap,
   CheckCircle2,
   Sparkles,
   Server,
   Lock,
-  Flag
+  Flag,
+  Loader2
 } from "lucide-react";
 import { clsx } from "clsx";
+import { apiClient } from "@/lib/api/client";
 
-const stats = [
-  { label: 'Total Revenue', value: '$84,200', change: '+12.5%', icon: DollarSign },
-  { label: 'Active Users', value: '1,420', change: '+5.2%', icon: Users },
-  { label: 'Live Streams', value: '84', change: '+24.1%', icon: Activity },
-  { label: 'Platform Fee', value: '$8,420', change: '+12.5%', icon: Zap },
-];
+interface AdminStats {
+  totalRevenue?: number;
+  activeUsers?: number;
+  liveStreams?: number;
+  platformFee?: number;
+}
+
+interface StatConfig {
+  label: string;
+  value?: string | number;
+  change: string;
+  icon: any;
+}
 
 const flags = [
   { id: '1', user: '@CyberPunk', reason: 'Copyright', status: 'PENDING' },
@@ -33,6 +42,30 @@ const flags = [
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MODERATION' | 'SYSTEM'>('OVERVIEW');
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await apiClient.get<AdminStats>('/admin/stats');
+        setAdminStats(response.data);
+      } catch (error) {
+        console.error('Failed to fetch admin stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const stats: StatConfig[] = [
+    { label: 'Total Revenue', value: `$${(adminStats?.totalRevenue || 0).toLocaleString()}`, change: '+12.5%', icon: DollarSign },
+    { label: 'Active Users', value: (adminStats?.activeUsers || 0).toLocaleString(), change: '+5.2%', icon: Users },
+    { label: 'Live Streams', value: (adminStats?.liveStreams || 0).toLocaleString(), change: '+24.1%', icon: Activity },
+    { label: 'Platform Fee', value: `$${(adminStats?.platformFee || 0).toLocaleString()}`, change: '+12.5%', icon: Zap },
+  ];
 
   return (
     <div className="container max-w-7xl mx-auto p-8 space-y-12 pb-24 animate-fade-in font-sans">
@@ -69,20 +102,32 @@ export default function AdminPage() {
         <>
           {/* Stats Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((s, i) => (
-               <div key={i} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-[#9E398D]/20 transition-all group shadow-xl">
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5">
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 animate-pulse" />
+                    <div className="h-6 bg-white/5 rounded-lg animate-pulse" />
+                    <div className="h-4 bg-white/5 rounded-lg animate-pulse w-3/4" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              stats.map((s, i) => (
+                <div key={i} className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-[#9E398D]/20 transition-all group shadow-xl">
                   <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#9E398D] mb-6 group-hover:scale-110 transition-all">
-                     <s.icon className="w-5 h-5" />
+                    <s.icon className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                     <p className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">{s.label}</p>
-                     <div className="flex items-end justify-between">
-                        <span className="text-3xl font-black text-white">{s.value}</span>
-                        <span className="text-[10px] font-black text-green-500 mb-1">{s.change}</span>
-                     </div>
+                    <p className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">{s.label}</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-3xl font-black text-white">{s.value}</span>
+                      <span className="text-[10px] font-black text-green-500 mb-1">{s.change}</span>
+                    </div>
                   </div>
-               </div>
-            ))}
+                </div>
+              ))
+            )}
           </section>
 
           {/* Revenue Chart Placeholder */}
