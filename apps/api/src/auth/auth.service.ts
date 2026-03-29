@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -13,6 +14,7 @@ import { LoginDto } from './dto/login.dto';
 import { InvalidRefreshTokenError } from '../common/errors/known-error';
 import { JobsService } from '../jobs/jobs.service';
 import { GoogleProfile } from './strategies/google.strategy';
+import { EmailService } from '../email/email.service';
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -27,6 +29,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly jobsService: JobsService,
+    private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -146,6 +150,9 @@ export class AuthService {
         expiresAt,
       },
     });
+
+    const magicLinkBaseUrl = `${this.configService.get('FRONTEND_URL')}/auth/magic/verify`;
+    await this.emailService.sendMagicLink(email, token, magicLinkBaseUrl);
 
     return {
       success: true,
