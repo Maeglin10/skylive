@@ -7,7 +7,51 @@ import * as Sentry from '@sentry/node';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
+/**
+ * Validates required and optional environment variables at startup
+ */
+function validateEnv() {
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Required variables (all environments)
+  const required = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+  const missing = required.filter(k => !process.env[k]);
+
+  if (missing.length) {
+    console.error(`[ENV_VALIDATION] Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
+  // Validate JWT_SECRET and JWT_REFRESH_SECRET minimum length
+  const jwtSecret = process.env.JWT_SECRET || '';
+  const jwtRefreshSecret = process.env.JWT_REFRESH_SECRET || '';
+
+  if (jwtSecret.length < 32) {
+    console.error(`[ENV_VALIDATION] JWT_SECRET must be at least 32 characters (current: ${jwtSecret.length})`);
+    process.exit(1);
+  }
+
+  if (jwtRefreshSecret.length < 32) {
+    console.error(`[ENV_VALIDATION] JWT_REFRESH_SECRET must be at least 32 characters (current: ${jwtRefreshSecret.length})`);
+    process.exit(1);
+  }
+
+  // Optional variables with warnings in production
+  const optional = ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET', 'REDIS_URL', 'RESEND_API_KEY', 'AWS_ACCESS_KEY_ID'];
+
+  if (isProduction) {
+    const missingOptional = optional.filter(k => !process.env[k]);
+    if (missingOptional.length) {
+      console.warn(`[ENV_VALIDATION] Missing optional environment variables in production: ${missingOptional.join(', ')}`);
+    }
+  }
+
+  console.log('[ENV_VALIDATION] All required environment variables validated');
+}
+
 async function bootstrap() {
+  // Validate environment variables before initializing the app
+  validateEnv();
   if (process.env.SENTRY_DSN) {
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
