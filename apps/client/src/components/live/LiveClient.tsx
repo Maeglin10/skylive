@@ -3,9 +3,11 @@
 import { HLSPlayer } from "@/components/player/HLSPlayer";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { PollsOverlay } from "@/components/live/PollsOverlay";
-import { Heart, Share2, Users, AlertCircle, Sparkles, BarChart3 } from "lucide-react";
+import { Heart, Share2, Users, AlertCircle, BarChart3 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { clsx } from "clsx";
+import { liveAdapter } from "@/lib/api/live.adapter";
+import type { LiveSession } from "@/lib/api/types";
 
 interface LiveClientProps {
   id: string;
@@ -14,23 +16,26 @@ interface LiveClientProps {
 export function LiveClient({ id }: LiveClientProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPollOpen, setIsPollOpen] = useState(false);
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<LiveSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Mock session fetch
-    setTimeout(() => {
-      setSession({
-        id,
-        title: "Late night high intensity painting session",
-        creatorName: "Elena Creative",
-        creatorAvatar: null,
-        viewerCount: 142,
-        hlsUrl: `http://localhost:8080/hls/test.m3u8`, // Mock URL
-        status: 'LIVE'
-      });
-      setIsLoading(false);
-    }, 800);
+    const fetchSession = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await liveAdapter.getSession(id);
+        setSession(data);
+      } catch (err) {
+        console.error('Failed to fetch live session:', err);
+        setError('Failed to load live session. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSession();
   }, [id]);
 
   if (isLoading) {
@@ -41,15 +46,37 @@ export function LiveClient({ id }: LiveClientProps) {
     );
   }
 
+  if (error || !session) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="flex flex-col items-center gap-4 p-8 rounded-2xl border border-white/5 bg-[#0a0a0a]">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <div className="text-center space-y-2">
+            <p className="text-neutral-300 font-medium">{error || 'Session not found'}</p>
+            <a href="/feed" className="text-[#9E398D] text-sm font-bold hover:underline">
+              Back to Feed
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-black overflow-hidden font-sans">
       {/* Main Player Area */}
       <div className="flex flex-col flex-1 min-w-0 bg-black">
         <div className="flex items-center justify-center flex-1 p-6 bg-[#0a0a0a]/50">
-          <HLSPlayer 
-            src={session.hlsUrl} 
-            className="w-full max-w-5xl shadow-[0_20px_80px_-20px_rgba(158,57,141,0.4)] ring-1 ring-white/5"
-          />
+          {session.hlsUrl ? (
+            <HLSPlayer
+              src={session.hlsUrl}
+              className="w-full max-w-5xl shadow-[0_20px_80px_-20px_rgba(158,57,141,0.4)] ring-1 ring-white/5"
+            />
+          ) : (
+            <div className="flex items-center justify-center w-full max-w-5xl aspect-video bg-[#0a0a0a] border border-white/5 rounded-2xl">
+              <p className="text-neutral-400">Stream not available</p>
+            </div>
+          )}
           <PollsOverlay isOpen={isPollOpen} onClose={() => setIsPollOpen(false)} />
         </div>
 
@@ -58,7 +85,7 @@ export function LiveClient({ id }: LiveClientProps) {
           <div className="flex justify-between items-start gap-8">
             <div className="flex-1 space-y-4">
               <div className="flex items-center gap-3">
-                 <div className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]`}>
+                <div className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]`}>
                   Live
                 </div>
                 <h1 className="text-2xl font-black tracking-tight text-white leading-tight">{session.title}</h1>
@@ -66,7 +93,7 @@ export function LiveClient({ id }: LiveClientProps) {
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3 group cursor-pointer">
                   <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-sm font-bold text-white border border-white/10 ring-2 ring-transparent group-hover:ring-[#9E398D]/20 transition-all">
-                    E
+                    {session.creatorName.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-bold">{session.creatorName}</p>
@@ -82,7 +109,7 @@ export function LiveClient({ id }: LiveClientProps) {
             </div>
 
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={() => setIsFollowing(!isFollowing)}
                 className={clsx(
                   "px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-2",
@@ -92,17 +119,17 @@ export function LiveClient({ id }: LiveClientProps) {
                 {!isFollowing && <Heart className="w-4 h-4 fill-current" />}
                 {isFollowing ? "Following" : "Follow"}
               </button>
-              <button 
+              <button
                 title="Share stream"
                 className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-all transform hover:-translate-y-1"
               >
                 <Share2 className="w-4 h-4" />
               </button>
-              <button 
+              <button
                 onClick={() => setIsPollOpen(!isPollOpen)}
                 className={clsx(
-                   "px-4 py-3 rounded-xl border transition-all transform hover:-translate-y-1",
-                   isPollOpen ? "bg-[#9E398D]/20 border-[#9E398D]/50 text-[#9E398D]" : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                  "px-4 py-3 rounded-xl border transition-all transform hover:-translate-y-1",
+                  isPollOpen ? "bg-[#9E398D]/20 border-[#9E398D]/50 text-[#9E398D]" : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
                 )}
               >
                 <BarChart3 className="w-4 h-4" />
