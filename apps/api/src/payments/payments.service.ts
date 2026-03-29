@@ -2,12 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { NotificationsGateway } from '../events/notifications.gateway';
 
 @Injectable()
 export class PaymentsService {
   private readonly stripe: Stripe;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsGateway: NotificationsGateway,
+  ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
       apiVersion: '2024-06-20',
     });
@@ -203,6 +207,17 @@ export class PaymentsService {
             stripePaymentIntentId: intent.id,
           },
         });
+
+        const tipAmount = (intent.amount / 100).toFixed(2);
+        this.notificationsGateway.notifyUser(metadata.creatorId, {
+          type: 'new_tip',
+          message: `Vous avez reçu un tip de ${tipAmount}€`,
+          data: {
+            tipAmount,
+            message: metadata.message || null,
+          },
+          createdAt: new Date().toISOString(),
+        });
       } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           return;
@@ -218,7 +233,7 @@ export class PaymentsService {
 
     if (!creatorId || !userId) return;
 
-    await this.prisma.subscription.upsert({
+    const result = await this.prisma.subscription.upsert({
       where: { userId_creatorId: { userId, creatorId } },
       update: {
         status: subscription.status.toUpperCase() as any,
@@ -231,5 +246,16 @@ export class PaymentsService {
         stripeSubscriptionId: subscription.id,
       },
     });
+
+    if (result.status === 'ACTIVE') {
+      this.notificationsGateway.notifyUser(creatorId, {
+        type: 'new_subscriber',
+        message: 'Vous avez un nouveau subscriber',
+        data: {
+          subscriberId: userId,
+        },
+        createdAt: new Date().toISOString(),
+      });
+    }
   }
 }

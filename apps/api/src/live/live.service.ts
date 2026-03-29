@@ -4,12 +4,14 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLiveSessionDto } from './dto/create-live-session.dto';
 import { JobsService } from '../jobs/jobs.service';
+import { NotificationsGateway } from '../events/notifications.gateway';
 
 @Injectable()
 export class LiveService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jobsService: JobsService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   private async getCreatorId(userId: string) {
@@ -82,6 +84,16 @@ export class LiveService {
       source: 'api',
     });
 
+    this.notificationsGateway.notifyUser(updated.creatorId, {
+      type: 'live_started',
+      message: 'Votre live est en cours',
+      data: {
+        sessionId: updated.id,
+        title: updated.title,
+      },
+      createdAt: new Date().toISOString(),
+    });
+
     return updated;
   }
 
@@ -125,6 +137,16 @@ export class LiveService {
       liveSessionId: updated.id,
       creatorId: updated.creatorId,
       source: 'rtmp',
+    });
+
+    this.notificationsGateway.notifyUser(updated.creatorId, {
+      type: 'live_started',
+      message: 'Votre live est en cours',
+      data: {
+        sessionId: updated.id,
+        title: updated.title,
+      },
+      createdAt: new Date().toISOString(),
     });
 
     return updated;
