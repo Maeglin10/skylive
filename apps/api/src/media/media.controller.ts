@@ -1,10 +1,12 @@
-import { BadRequestException, Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MediaService } from './media.service';
 import { ContentService } from '../content/content.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Throttle } from '@nestjs/throttler';
+import { PresignDto } from './presign.dto';
+import { randomUUID } from 'crypto';
 
 @Controller('media')
 @UseGuards(JwtAuthGuard)
@@ -31,6 +33,13 @@ export class MediaController {
   )
   upload(@UploadedFile() file: Express.Multer.File) {
     return this.mediaService.upload(file);
+  }
+
+  @Post('presign')
+  async presign(@Body() dto: PresignDto) {
+    const folder = dto.folder || 'uploads';
+    const key = `${folder}/${randomUUID()}-${dto.fileName}`;
+    return this.mediaService.presignUploadUrl(key, dto.contentType);
   }
 
   @Get('content/:contentId/signed-url')
