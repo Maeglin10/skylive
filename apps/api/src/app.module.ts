@@ -25,6 +25,8 @@ import { ModerationModule } from './moderation/moderation.module';
 import { MetricsMiddleware } from './metrics/metrics.middleware';
 import { EventsModule } from './events/events.module';
 import { AdminModule } from './admin/admin.module';
+import { EmailModule } from './email/email.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { AdminModule } from './admin/admin.module';
     ModerationModule,
     EventsModule,
     AdminModule,
+    EmailModule,
+    SearchModule,
   ],
   providers: [
     {
