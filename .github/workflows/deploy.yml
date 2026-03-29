@@ -1,34 +1,41 @@
-name: Deploy Production
+name: Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
     branches: [main]
+
+# ============================================================================
+# REQUIRED SECRETS (to be configured in GitHub repository settings):
+# - SSH_HOST: Deployment server hostname/IP
+# - SSH_USERNAME: SSH user for deployment
+# - SSH_PRIVATE_KEY: SSH private key for authentication
+# - DATABASE_URL: Database connection string (if not in server env)
+# - JWT_SECRET: JWT signing secret (min 32 characters)
+# - JWT_REFRESH_SECRET: JWT refresh secret (min 32 characters)
+# ============================================================================
 
 jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [] # add test job name here once tests exist
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: production
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /opt/skylive
             git pull origin main
-            docker compose pull
-            docker compose up -d --build --remove-orphans
-            docker compose exec -T api npx prisma migrate deploy
-            docker system prune -f
+            pnpm install --frozen-lockfile
+            pnpm -C apps/api exec prisma migrate deploy
+            docker compose up -d --build api client
             echo "Deploy completed at $(date)"
-
-      - name: Health check
-        run: |
-          sleep 30
-          curl -f https://${{ secrets.DOMAIN }}/api/health || exit 1
