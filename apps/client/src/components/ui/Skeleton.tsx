@@ -1,5 +1,10 @@
 import { clsx } from 'clsx';
 
+/**
+ * Skeleton component for loading states
+ * @param className - Additional CSS classes to apply
+ * @returns A pulsing skeleton placeholder element with shimmer effect
+ */
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
