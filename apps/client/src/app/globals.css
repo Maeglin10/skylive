@@ -32,19 +32,19 @@
   --card-foreground: 0 0% 98%;
   --popover: 0 0% 3.9%;
   --popover-foreground: 0 0% 98%;
-  --primary: 310 47% 42%;
+  --primary: 187 94% 42%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 310 46% 22%;
+  --secondary: 187 94% 22%;
   --secondary-foreground: 0 0% 98%;
-  --muted: 310 46% 12%;
+  --muted: 187 46% 12%;
   --muted-foreground: 210 7% 60%;
-  --accent: 310 46% 22%;
+  --accent: 187 94% 22%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
-  --border: 310 46% 22%;
-  --input: 310 46% 22%;
-  --ring: 310 47% 42%;
+  --border: 187 94% 15%;
+  --input: 187 94% 15%;
+  --ring: 187 94% 42%;
 }
 
 @layer base {
@@ -61,7 +61,7 @@
 }
 
 .gradient-primary {
-  @apply bg-gradient-to-br from-[#9E398D] to-[#521E49];
+  @apply bg-gradient-to-br from-[#06B6D4] to-[#0891B2];
 }
 
 @layer utilities {

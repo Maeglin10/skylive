@@ -7,8 +7,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Skylive",
-  description: "Live Streaming & Content Platform",
+  title: "ANTIGRAVITY — Content & Live",
+  description: "The ultimate platform for creators and fans. Powered by Antigravity.",
   manifest: "/manifest.json",
   icons: {
     apple: "/icon.png",

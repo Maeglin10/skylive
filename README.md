@@ -1,8 +1,8 @@
-# Skylive
+# Antigravity
 
 **Plateforme unifiée — Contenu payant + Live streaming**
 
-Skylive est une plateforme tout-en-un permettant aux créateurs de publier du contenu payant (abonnements, pay-per-view, feed privé) et de diffuser des lives en temps réel — avec chat intégré et monétisation hybride.
+Antigravity est une plateforme tout-en-un permettant aux créateurs de publier du contenu payant (abonnements, pay-per-view, feed privé) et de diffuser des lives en temps réel — avec chat intégré et monétisation hybride.
 
 ---
 
@@ -98,7 +98,7 @@ User → Tip[] → Creator
 ### Installation
 
 ```bash
-git clone <repo> skylive && cd skylive
+git clone <repo> antigravity && cd antigravity
 
 # Infrastructure (DB, Redis, RTMP)
 docker compose up -d postgres redis rtmp

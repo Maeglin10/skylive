@@ -105,6 +105,7 @@ model Creator {
   contents     Content[]
   liveSessions LiveSession[]
   subscribers  Subscription[]
+  subscriptionTiers SubscriptionTier[]
   tips         Tip[]
 }
 
@@ -177,6 +178,7 @@ model Subscription {
   id                   String             @id @default(uuid())
   userId               String
   creatorId            String
+  tierId               String?
   status               SubscriptionStatus @default(ACTIVE)
   stripeSubscriptionId String?
   createdAt            DateTime           @default(now())
@@ -184,8 +186,25 @@ model Subscription {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  tier    SubscriptionTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
 
   @@unique([userId, creatorId])
+  @@index([creatorId])
+  @@index([tierId])
+}
+
+model SubscriptionTier {
+  id        String   @id @default(uuid())
+  creatorId String
+  name      String
+  price     Int
+  perks     String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator       Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+
   @@index([creatorId])
 }
 

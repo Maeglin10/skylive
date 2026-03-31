@@ -22,7 +22,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between backdrop-blur-md border-b border-white/5 mx-auto max-w-7xl rounded-b-3xl">
          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black tracking-tighter text-[#9E398D]">SKYLIVE</h1>
+            <h1 className="text-2xl font-black tracking-tighter text-[#06B6D4]">ANTIGRAVITY</h1>
          </div>
          <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
             <a href="#features" className="hover:text-white transition-all">Features</a>
@@ -59,7 +59,7 @@ export default function LandingPage() {
               className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.95] max-w-4xl"
             >
               OWN YOUR <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#9E398D] to-[#521E49]">CREATIVITY</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#06B6D4] to-[#0891B2]">CREATIVITY</span>
             </motion.h1>
             
             <motion.p 
@@ -68,7 +68,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-neutral-400 font-medium max-w-2xl tracking-tight leading-relaxed"
             >
-              SkyLive is the premium platform for live streaming and exclusive content.
+              Antigravity is the premium platform for live streaming and exclusive content.
               No middlemen. No shadow-bans. Just pure creation.
             </motion.p>
             
@@ -110,7 +110,7 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section id="features" className="py-32 px-6 max-w-7xl mx-auto space-y-20">
          <div className="text-center space-y-6">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#9E398D]">Why Skylive?</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#06B6D4]">Why Antigravity?</h2>
             <h3 className="text-4xl md:text-6xl font-black tracking-tight">PLATFORM FOR THE NEXT GEN</h3>
          </div>
 
@@ -149,7 +149,7 @@ export default function LandingPage() {
                <ul className="space-y-6">
                   {[
                      { icon: Gamepad2, label: "Advanced Gaming Tools", color: "text-blue-500" },
-                     { icon: Rocket, label: "Instant Global Payouts", color: "text-[#9E398D]" },
+                     { icon: Rocket, label: "Instant Global Payouts", color: "text-[#06B6D4]" },
                      { icon: Globe, label: "Global Content Delivery", color: "text-green-500" }
                   ].map((item, i) => (
                      <li key={i} className="flex items-center gap-6 group cursor-pointer">
@@ -161,7 +161,7 @@ export default function LandingPage() {
                   ))}
                </ul>
 
-               <Link href="/creator/studio" className="inline-flex items-center gap-4 text-[#9E398D] font-black uppercase tracking-[0.2em] text-[10px] hover:translate-x-2 transition-all">
+               <Link href="/creator/studio" className="inline-flex items-center gap-4 text-[#06B6D4] font-black uppercase tracking-[0.2em] text-[10px] hover:translate-x-2 transition-all">
                   Explore Creator Tools <ArrowRight className="w-4 h-4" />
                </Link>
             </div>
@@ -175,7 +175,7 @@ export default function LandingPage() {
                     alt="Abstract Creative"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/0 text-white p-12 flex flex-col justify-end gap-2">
-                     <div className="flex items-center gap-2 px-4 py-1 rounded-full bg-[#9E398D] w-fit text-[10px] font-black uppercase tracking-widest mb-4">Live</div>
+                     <div className="flex items-center gap-2 px-4 py-1 rounded-full bg-[#06B6D4] w-fit text-[10px] font-black uppercase tracking-widest mb-4">Live</div>
                      <p className="text-3xl font-black uppercase tracking-tighter">Elena Creative</p>
                      <p className="text-sm font-medium text-neutral-400">Late night painting & coding session</p>
                   </div>
@@ -198,7 +198,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="p-12 border-t border-white/5 mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-8">
          <div className="flex flex-col items-center md:items-start gap-2 text-center md:text-left">
-            <h1 className="text-xl font-black tracking-tighter text-[#9E398D]">SKYLIVE</h1>
+            <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">ANTIGRAVITY</h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">The Ultimate Creator Hub © 2026</p>
          </div>
          <div className="flex gap-12 text-[10px] font-black uppercase tracking-widest text-neutral-500">
@@ -215,7 +215,7 @@ export default function LandingPage() {
 function FeatureCard({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
   return (
     <div className="p-12 rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-[#9E398D]/30 transition-all group hover:-translate-y-2 shadow-2xl">
-       <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#9E398D] mb-8 group-hover:scale-110 transition-all">
+       <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-[#06B6D4] mb-8 group-hover:scale-110 transition-all">
           <Icon className="w-8 h-8" />
        </div>
        <h4 className="text-2xl font-black text-white tracking-tight mb-4 uppercase">{title}</h4>

@@ -1,5 +1,5 @@
 {
-  "name": "skylive",
+  "name": "antigravity",
   "private": true,
   "scripts": {
     "dev": "pnpm --parallel -r dev",
