@@ -69,7 +69,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-neutral-400 font-medium max-w-2xl tracking-tight leading-relaxed"
             >
-              Antigravity is the premium platform for live streaming and exclusive content.
+              SkyLive is the premium platform for live streaming and exclusive content.
               No middlemen. No shadow-bans. Just pure creation.
             </motion.p>
             
@@ -111,7 +111,7 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section id="features" className="py-32 px-6 max-w-7xl mx-auto space-y-20">
          <div className="text-center space-y-6">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#06B6D4]">Why Antigravity?</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#06B6D4]">Why SkyLive?</h2>
             <h3 className="text-4xl md:text-6xl font-black tracking-tight">PLATFORM FOR THE NEXT GEN</h3>
          </div>
 
