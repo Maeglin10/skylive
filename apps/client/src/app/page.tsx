@@ -31,6 +31,7 @@ export default function LandingPage() {
          </div>
          <div className="flex items-center gap-4">
             <Link href="/login" className="text-xs font-black uppercase tracking-widest text-neutral-400 hover:text-white transition-all px-4">Sign In</Link>
+            <Link href="/demo" className="text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 rounded-full border border-white/20 hover:border-white/40 text-white/70 hover:text-white transition-all">Try Demo</Link>
             <Link href="/register" className="gradient-primary text-white text-[10px] font-black uppercase tracking-[0.2em] px-8 py-3 rounded-full hover:scale-105 transition-all shadow-xl">Join Now</Link>
          </div>
       </nav>
