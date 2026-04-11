@@ -22,7 +22,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between backdrop-blur-md border-b border-white/5 mx-auto max-w-7xl rounded-b-3xl">
          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black tracking-tighter text-[#06B6D4]">ANTIGRAVITY</h1>
+            <h1 className="text-2xl font-black tracking-tighter text-[#06B6D4]">SkyLive</h1>
          </div>
          <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
             <a href="#features" className="hover:text-white transition-all">Features</a>
@@ -198,7 +198,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="p-12 border-t border-white/5 mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-8">
          <div className="flex flex-col items-center md:items-start gap-2 text-center md:text-left">
-            <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">ANTIGRAVITY</h1>
+            <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">SkyLive</h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">The Ultimate Creator Hub © 2026</p>
          </div>
          <div className="flex gap-12 text-[10px] font-black uppercase tracking-widest text-neutral-500">
