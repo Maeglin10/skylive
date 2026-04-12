@@ -32,7 +32,7 @@ export default function DemoPage() {
           <Link href="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm">
             <ArrowLeft className="w-4 h-4" /> Back
           </Link>
-          <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">SkyLive</h1>
+          <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">AeviaLive</h1>
           <span className="text-[10px] bg-white/10 text-white/60 px-2 py-0.5 rounded-full uppercase tracking-wider">Demo</span>
         </div>
         <div className="flex items-center gap-3">

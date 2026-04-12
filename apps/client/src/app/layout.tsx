@@ -7,7 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "SkyLive — Content & Live",
+  title: "AeviaLive — Content & Live",
   description: "The ultimate platform for creators and fans. Go live, share content, build your audience.",
   manifest: "/manifest.json",
   icons: {

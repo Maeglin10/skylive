@@ -22,7 +22,7 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex items-center justify-between backdrop-blur-md border-b border-white/5 mx-auto max-w-7xl rounded-b-3xl">
          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black tracking-tighter text-[#06B6D4]">SkyLive</h1>
+            <h1 className="text-2xl font-black tracking-tighter text-[#06B6D4]">AeviaLive</h1>
          </div>
          <div className="hidden md:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">
             <a href="#features" className="hover:text-white transition-all">Features</a>
@@ -69,7 +69,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl text-neutral-400 font-medium max-w-2xl tracking-tight leading-relaxed"
             >
-              SkyLive is the premium platform for live streaming and exclusive content.
+              AeviaLive is the premium platform for live streaming and exclusive content.
               No middlemen. No shadow-bans. Just pure creation.
             </motion.p>
             
@@ -111,7 +111,7 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section id="features" className="py-32 px-6 max-w-7xl mx-auto space-y-20">
          <div className="text-center space-y-6">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#06B6D4]">Why SkyLive?</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#06B6D4]">Why AeviaLive?</h2>
             <h3 className="text-4xl md:text-6xl font-black tracking-tight">PLATFORM FOR THE NEXT GEN</h3>
          </div>
 
@@ -199,7 +199,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="p-12 border-t border-white/5 mx-auto max-w-7xl flex flex-col md:flex-row justify-between items-center gap-8">
          <div className="flex flex-col items-center md:items-start gap-2 text-center md:text-left">
-            <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">SkyLive</h1>
+            <h1 className="text-xl font-black tracking-tighter text-[#06B6D4]">AeviaLive</h1>
             <p className="text-[10px] font-black uppercase tracking-widest text-neutral-600">The Ultimate Creator Hub © 2026</p>
          </div>
          <div className="flex gap-12 text-[10px] font-black uppercase tracking-widest text-neutral-500">

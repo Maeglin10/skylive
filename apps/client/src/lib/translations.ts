@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     hero_title: "OWN YOUR CREATIVITY",
-    hero_p: "SkyLive is the premium platform for live streaming and exclusive content.",
+    hero_p: "AeviaLive is the premium platform for live streaming and exclusive content.",
     cta_start: "Start Creating",
     cta_watch: "Watch Live",
     nav_features: "Features",
@@ -12,7 +12,7 @@ export const translations = {
   },
   fr: {
     hero_title: "POSSÉDEZ VOTRE CRÉATIVITÉ",
-    hero_p: "SkyLive est la plateforme premium pour le live streaming et le contenu exclusif.",
+    hero_p: "AeviaLive est la plateforme premium pour le live streaming et le contenu exclusif.",
     cta_start: "Commencer à Créer",
     cta_watch: "Regarder en Live",
     nav_features: "Fonctionnalités",
