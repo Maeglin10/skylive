@@ -255,7 +255,7 @@ export class AuthService {
   private async issueTokens(userId: string, email: string, role: string): Promise<AuthTokens> {
     const accessToken = this.jwtService.sign(
       { sub: userId, email, role },
-      { expiresIn: process.env.JWT_EXPIRATION || '12h' },
+      { expiresIn: (process.env.JWT_EXPIRATION || '12h') as any },
     );
 
     const refreshToken = randomBytes(48).toString('hex');

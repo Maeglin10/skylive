@@ -12,7 +12,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'dev_secret',
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '12h' },
+      signOptions: { expiresIn: (process.env.JWT_EXPIRATION || '12h') as any },
     }),
     JobsModule,
   ],

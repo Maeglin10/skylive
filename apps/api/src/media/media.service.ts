@@ -21,7 +21,7 @@ export class MediaService {
     });
   }
 
-  async upload(file: Express.Multer.File) {
+  async upload(file: any) {
     if (!this.bucket) {
       throw new Error('S3_BUCKET is not configured');
     }

@@ -31,10 +31,10 @@ import { SearchModule } from './search/search.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ThrottlerModule.forRoot({
-      ttl: Number(process.env.THROTTLE_TTL ?? 60),
+    ThrottlerModule.forRoot([{
+      ttl: Number(process.env.THROTTLE_TTL ?? 60) * 1000,
       limit: Number(process.env.THROTTLE_LIMIT ?? 100),
-    }),
+    }]),
     BullModule.forRoot({
       redis: process.env.REDIS_URL
         ? process.env.REDIS_URL

@@ -77,6 +77,7 @@ model User {
   blockedBy     Blocklist[]    @relation("BlocklistTarget")
   bans          Ban[]          @relation("BansOnUser")
   bansIssued    Ban[]          @relation("BansIssued")
+  eventLogs     EventLog[]     @relation("EventLogs")
 }
 
 model RefreshToken {
@@ -125,6 +126,7 @@ model Content {
 
   creator  Creator    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   purchases Purchase[]
+  reports   Report[]
 
   @@index([creatorId])
 }
@@ -147,6 +149,7 @@ model LiveSession {
   chatRoom ChatRoom?
   purchases Purchase[]
   tips      Tip[]
+  reports   Report[]
 
   @@index([creatorId])
 }
@@ -169,6 +172,7 @@ model Message {
 
   chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports  Report[]
 
   @@index([chatRoomId])
   @@index([userId])
@@ -312,7 +316,7 @@ model EventLog {
   userId    String?
   createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation("EventLogs", fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([type])
   @@index([createdAt])

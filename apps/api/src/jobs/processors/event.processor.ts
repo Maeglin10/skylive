@@ -17,7 +17,7 @@ export class EventProcessor {
     await this.prisma.eventLog.create({
       data: {
         type: job.data.type,
-        payload: payload,
+        payload: payload as any,
         userId,
       },
     });

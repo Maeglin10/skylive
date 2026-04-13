@@ -4,6 +4,6 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateReportDto {
   @IsEnum(ReportStatus)
-  @ApiProperty({ enum: ReportStatus, example: ReportStatus.REVIEWED })
+  @ApiProperty({ enum: ReportStatus, example: ReportStatus.RESOLVED })
   status!: ReportStatus;
 }

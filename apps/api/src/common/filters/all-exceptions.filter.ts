@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+const { PrismaClientKnownRequestError, PrismaClientUnknownRequestError, PrismaClientValidationError } = Prisma as any;
 import { Request, Response } from 'express';
 import * as Sentry from '@sentry/node';
 import { KnownError } from '../errors/known-error';
@@ -37,8 +38,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
           scope.setTag('path', request.url);
           scope.setTag('method', request.method);
           scope.setTag('status', String(status));
-          if (request.id) {
-            scope.setExtra('requestId', request.id);
+          if ((request as any).id) {
+            scope.setExtra('requestId', (request as any).id);
           }
           scope.setExtra('ip', request.ip);
           scope.setExtra('userAgent', request.headers['user-agent']);
@@ -51,7 +52,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ...body,
       timestamp: new Date().toISOString(),
       path: request.url,
-      ...(request.id && { requestId: request.id }),
+      ...((request as any).id && { requestId: (request as any).id }),
     });
   }
 
@@ -98,9 +99,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   private isPrismaError(exception: unknown): boolean {
     return (
-      exception instanceof Prisma.PrismaClientKnownRequestError ||
-      exception instanceof Prisma.PrismaClientUnknownRequestError ||
-      exception instanceof Prisma.PrismaClientValidationError
+      exception instanceof PrismaClientKnownRequestError ||
+      exception instanceof PrismaClientUnknownRequestError ||
+      exception instanceof PrismaClientValidationError
     );
   }
 
@@ -108,7 +109,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     status: number;
     body: Record<string, unknown>;
   } {
-    if (error instanceof Prisma.PrismaClientValidationError) {
+    if (error instanceof PrismaClientValidationError) {
       return {
         status: HttpStatus.BAD_REQUEST,
         body: {
@@ -118,7 +119,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
-    if (error instanceof Prisma.PrismaClientUnknownRequestError) {
+    if (error instanceof PrismaClientUnknownRequestError) {
       return {
         status: HttpStatus.INTERNAL_SERVER_ERROR,
         body: {
@@ -128,7 +129,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       };
     }
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error instanceof PrismaClientKnownRequestError) {
       return {
         status: HttpStatus.CONFLICT,
         body: {

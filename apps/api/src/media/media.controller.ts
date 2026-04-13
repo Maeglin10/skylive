@@ -1,3 +1,4 @@
+import { Multer } from 'multer';
 import { BadRequestException, Body, Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -31,7 +32,7 @@ export class MediaController {
       },
     }),
   )
-  upload(@UploadedFile() file: Express.Multer.File) {
+  upload(@UploadedFile() file: any & { buffer: Buffer }) {
     return this.mediaService.upload(file);
   }
 
@@ -47,7 +48,7 @@ export class MediaController {
     @CurrentUser() user: { id: string },
     @Param('contentId') contentId: string,
   ) {
-    const content = await this.contentService.getById(user.id, contentId);
+    const content = await this.contentService.getById({ id: user.id, role: "VIEWER" }, contentId);
     if (!content.mediaKey) {
       throw new BadRequestException('Content does not have a media key');
     }

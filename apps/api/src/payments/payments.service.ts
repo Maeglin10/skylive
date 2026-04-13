@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+const { PrismaClientKnownRequestError, PrismaClientUnknownRequestError, PrismaClientValidationError } = Prisma as any;
 import { NotificationsGateway } from '../events/notifications.gateway';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class PaymentsService {
     private readonly notificationsGateway: NotificationsGateway,
   ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-      apiVersion: '2024-06-20',
+      apiVersion: '2025-02-24.acacia' as any,
     });
   }
 
@@ -168,7 +169,7 @@ export class PaymentsService {
           },
         });
       } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
           return;
         }
         throw error;
@@ -187,7 +188,7 @@ export class PaymentsService {
           },
         });
       } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
           return;
         }
         throw error;
@@ -219,7 +220,7 @@ export class PaymentsService {
           createdAt: new Date().toISOString(),
         });
       } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
           return;
         }
         throw error;
