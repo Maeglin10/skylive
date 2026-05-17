@@ -141,7 +141,7 @@ export function CommandMenu() {
                    </div>
                    <div className="flex items-center gap-2">
                       <Sparkles className="w-3 h-3 text-[#9E398D]" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-700">Skylive OS v0.2.0</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-700">AeviaLive OS v0.2.0</span>
                    </div>
                 </div>
               </Command>

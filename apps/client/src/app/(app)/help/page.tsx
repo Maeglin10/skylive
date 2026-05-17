@@ -25,7 +25,7 @@ const categories = [
 const faqs = [
   { q: "How do I get paid?", a: "Payments are processed through Stripe and sent to your bank account every 7 days." },
   { q: "Is any content allowed?", a: "We have strict guidelines. No illegal or highly sensitive content as per our TOS." },
-  { q: "What is the platform fee?", a: "Skylive takes a flat 10% on payments to cover server costs and hosting." },
+  { q: "What is the platform fee?", a: "AeviaLive takes a flat 10% on payments to cover server costs and hosting." },
   { q: "How to connect OBS?", a: "Go to your Creator Studio and copy your unique Stream Key into OBS Settings." },
 ];
 

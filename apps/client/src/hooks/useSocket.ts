@@ -26,7 +26,7 @@ export function useSocket() {
 
     socket.on('connect', () => {
       setIsConnected(true);
-      console.log('Connected to Skylive WebSocket Signal');
+      console.log('Connected to AeviaLive WebSocket Signal');
     });
 
     socket.on('disconnect', () => {

@@ -4,7 +4,7 @@ export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const username = searchParams.get('username') || 'Skylive User';
+  const username = searchParams.get('username') || 'AeviaLive User';
 
   return new ImageResponse(
     (

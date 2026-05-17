@@ -25,7 +25,7 @@ export async function GET(request: Request) {
         }}
       >
         <div style={{ background: 'red', color: 'white', padding: '10px 30px', borderRadius: '50px', fontSize: 30, marginBottom: '40px', fontWeight: 'black', textTransform: 'uppercase' }}>LIVE NOW</div>
-        <div style={{ fontSize: 80, fontWeight: 'black' }}>Skylive Session</div>
+        <div style={{ fontSize: 80, fontWeight: 'black' }}>AeviaLive Session</div>
         <div style={{ fontSize: 30, marginTop: '40px', color: '#939AA1', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
           JOIN THE CONVERSATION
         </div>
