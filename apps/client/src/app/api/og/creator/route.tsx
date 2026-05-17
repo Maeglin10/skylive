@@ -24,7 +24,7 @@ export async function GET(request: Request) {
           border: '1px solid #9E398D'
         }}
       >
-        <div style={{ fontWeight: 'black', marginBottom: '20px', color: '#9E398D' }}>SKYLIVE</div>
+        <div style={{ fontWeight: 'black', marginBottom: '20px', color: '#9E398D' }}>AeviaLive</div>
         <div style={{ fontSize: 80, fontWeight: 'bold' }}>@{username}</div>
         <div style={{ fontSize: 30, marginTop: '40px', color: '#939AA1', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
           Premium Live Streaming

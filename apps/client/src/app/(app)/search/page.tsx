@@ -160,7 +160,7 @@ export default function SearchPage() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-black text-white tracking-tight">Start Discovery</h3>
-                <p className="text-sm text-neutral-500 font-medium">Type something to explore the Skylive ecosystem.</p>
+                <p className="text-sm text-neutral-500 font-medium">Type something to explore the AeviaLive ecosystem.</p>
               </div>
             </div>
           </section>

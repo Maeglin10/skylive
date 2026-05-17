@@ -20,7 +20,15 @@ export function useChat(liveSessionId: string) {
   useEffect(() => {
     if (!liveSessionId) return;
 
-    const socket = io(`${process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001'}/chat`, {
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL;
+    if (!wsUrl) {
+      if (typeof window !== 'undefined') {
+        console.warn('[useChat] NEXT_PUBLIC_WS_URL is not set — chat disabled');
+      }
+      return;
+    }
+
+    const socket = io(`${wsUrl}/chat`, {
       transports: ['websocket'],
       auth: {
         token: localStorage.getItem('access_token'),

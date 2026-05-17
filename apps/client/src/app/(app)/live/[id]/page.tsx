@@ -4,10 +4,10 @@ import { LiveClient } from "@/components/live/LiveClient";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   return {
-    title: `Live Stream ${id} | Skylive`,
-    description: `Watch live stream on Skylive. Real-time interaction and exclusive content.`,
+    title: `Live Stream ${id} | AeviaLive`,
+    description: `Watch live stream on AeviaLive. Real-time interaction and exclusive content.`,
     openGraph: {
-      title: `Live on Skylive`,
+      title: `Live on AeviaLive`,
       images: [`/api/og/live?id=${id}`],
     }
   };

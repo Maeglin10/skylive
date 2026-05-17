@@ -10,6 +10,9 @@ export default {
   theme: {
   	extend: {
   		colors: {
+  			brand: 'var(--color-brand)',
+  			'brand-dark': 'var(--color-brand-dark)',
+  			'accent-brand': 'var(--color-accent)',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --color-brand: #9E398D;
+  --color-brand-dark: #521E49;
+  --color-accent: #06B6D4;
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
   --card: 0 0% 100%;
@@ -61,7 +64,7 @@
 }
 
 .gradient-primary {
-  @apply bg-gradient-to-br from-[#06B6D4] to-[#0891B2];
+  background: linear-gradient(to bottom right, var(--color-accent), #0891B2);
 }
 
 @layer utilities {

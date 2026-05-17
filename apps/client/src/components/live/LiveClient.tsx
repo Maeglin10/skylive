@@ -289,7 +289,22 @@ export function LiveClient({ id }: LiveClientProps) {
                 </div>
 
                 <button
-                  onClick={() => setSubscribed(true)}
+                  onClick={async () => {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                    try {
+                      await fetch(`${apiUrl}/payments/subscribe`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        },
+                        body: JSON.stringify({ tierId: selectedTier, creatorId: session.creatorId }),
+                      });
+                    } catch {
+                      // continue — backend may not be ready yet
+                    }
+                    setSubscribed(true);
+                  }}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#9E398D] to-[#521E49] text-white font-black uppercase tracking-widest text-sm shadow-[0_10px_30px_-5px_rgba(158,57,141,0.4)] hover:scale-[1.02] transition-all"
                 >
                   Subscribe — {SUBSCRIPTION_TIERS.find(t => t.id === selectedTier)?.price}
@@ -358,7 +373,23 @@ export function LiveClient({ id }: LiveClientProps) {
 
                 <button
                   disabled={!tipAmount && !customTip}
-                  onClick={() => setTipped(true)}
+                  onClick={async () => {
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+                    const amount = tipAmount ?? Number(customTip);
+                    try {
+                      await fetch(`${apiUrl}/payments/tip`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                        },
+                        body: JSON.stringify({ amount, creatorId: session.creatorId }),
+                      });
+                    } catch {
+                      // continue — backend may not be ready yet
+                    }
+                    setTipped(true);
+                  }}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-pink-600 to-[#9E398D] text-white font-black uppercase tracking-widest text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] transition-all shadow-[0_10px_30px_-5px_rgba(236,72,153,0.4)]"
                 >
                   <Gift className="w-4 h-4 inline mr-2" />

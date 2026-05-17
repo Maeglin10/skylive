@@ -23,7 +23,7 @@ export default function RegisterPage() {
     try {
       await register({ displayName, email, password });
       toast.success("Account created!", {
-        description: "Welcome to Skylive! You can now start exploring."
+        description: "Welcome to AeviaLive! You can now start exploring."
       });
       router.push("/feed");
     } catch (err: any) {
@@ -41,7 +41,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-8 animate-scale-in">
         <div className="text-center">
           <Link href="/" className="inline-block">
-            <h1 className="text-4xl font-black tracking-tighter text-[#9E398D]">SKYLIVE</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-[#9E398D]">AeviaLive</h1>
           </Link>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-white">Join the Community</h2>
           <p className="mt-2 text-neutral-400">Start your journey today</p>

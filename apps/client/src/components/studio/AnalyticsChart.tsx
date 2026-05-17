@@ -1,16 +1,27 @@
 'use client';
 
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 
-const data = [
+interface ChartDataPoint {
+  name: string;
+  revenue: number;
+}
+
+interface AnalyticsChartProps {
+  /** Live revenue data from the API. When omitted, MOCK_DATA is displayed instead. */
+  data?: ChartDataPoint[];
+}
+
+// TODO: replace with real API data once /creators/me/analytics is implemented
+const MOCK_DATA: ChartDataPoint[] = [
   { name: 'Mon', revenue: 420 },
   { name: 'Tue', revenue: 580 },
   { name: 'Wed', revenue: 890 },
@@ -20,19 +31,24 @@ const data = [
   { name: 'Sun', revenue: 1280 },
 ];
 
-export function AnalyticsChart() {
+export function AnalyticsChart({ data }: AnalyticsChartProps) {
+  const chartData = data ?? MOCK_DATA;
+  const isMock = !data;
+
   return (
     <div className="h-[300px] w-full mt-6 bg-white/5 rounded-3xl p-6 border border-white/5 overflow-hidden">
       <div className="flex items-center justify-between mb-8">
          <h3 className="text-sm font-black uppercase tracking-widest text-neutral-400">Revenue Stream (Last 7 Days)</h3>
          <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#9E398D]" />
-            <span className="text-[10px] font-black uppercase text-neutral-500">Gross Earnings</span>
+            <span className="text-[10px] font-black uppercase text-neutral-500">
+              {isMock ? 'Sample Data' : 'Gross Earnings'}
+            </span>
          </div>
       </div>
-      
+
       <ResponsiveContainer width="100%" height="80%">
-        <AreaChart data={data}>
+        <AreaChart data={chartData}>
           <defs>
             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#9E398D" stopOpacity={0.3}/>

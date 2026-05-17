@@ -24,7 +24,7 @@ const referrals = [
 
 export default function AffiliatesPage() {
   const [copied, setCopied] = useState(false);
-  const referralCode = "SKYLIVE-ELENA-2026";
+  const referralCode = "AEVIALIVE-ELENA-2026";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(`https://skylive.io/join?ref=${referralCode}`);

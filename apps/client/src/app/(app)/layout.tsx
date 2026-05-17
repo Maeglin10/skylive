@@ -66,7 +66,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between px-4">
             <Link href="/feed">
               <h1 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#9E398D] to-[#521E49]">
-                SKYLIVE
+                AeviaLive
               </h1>
             </Link>
             <button 

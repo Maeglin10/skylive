@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       await login({ email, password });
       toast.success("Welcome back!", {
-        description: "Successfully signed into your Skylive account."
+        description: "Successfully signed into your AeviaLive account."
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Invalid credentials. Please try again.");
@@ -37,7 +37,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 animate-scale-in">
         <div className="text-center">
           <Link href="/" className="inline-block">
-            <h1 className="text-4xl font-black tracking-tighter text-[#9E398D]">SKYLIVE</h1>
+            <h1 className="text-4xl font-black tracking-tighter text-[#9E398D]">AeviaLive</h1>
           </Link>
           <h2 className="mt-4 text-2xl font-bold tracking-tight text-white">Welcome back</h2>
           <p className="mt-2 text-neutral-400">Unlock your world of content</p>

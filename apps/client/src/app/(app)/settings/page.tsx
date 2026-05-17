@@ -156,7 +156,7 @@ export default function SettingsPage() {
                <div className="space-y-12 animate-fade-in">
                   <div className="space-y-2">
                      <h3 className="text-2xl font-black text-white tracking-tight">Alert Preferences</h3>
-                     <p className="text-neutral-500 text-sm font-medium tracking-tight">Control how and when you want to be notified by Skylive.</p>
+                     <p className="text-neutral-500 text-sm font-medium tracking-tight">Control how and when you want to be notified by AeviaLive.</p>
                   </div>
 
                   <div className="space-y-6">
